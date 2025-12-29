@@ -1,145 +1,41 @@
 "use client";
+
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { useState, useEffect } from "react";
-import { createPortal } from "react-dom";
-import Link from "next/link";
 import Cookies from "js-cookie";
 import {
-  Package2,
-  ShoppingCart,
-  Users,
-  TrendingUp,
-  CreditCard,
+  Router,
+  Wifi,
   AlertCircle,
-  Star,
-  BarChart3,
-  Bell,
-  Eye,
-  EyeOff,
-  Package,
-  ShoppingBag,
-  Truck,
-  CheckCircle,
-  XCircle,
-  Clock,
-  RotateCw,
-  Download,
-  Plus,
-  MessageSquare,
-  Settings,
-  Megaphone,
-  Layers,
-  Notebook,
-  FileText,
-  Tag,
-  Store,
-  CircleDollarSign,
-  Filter,
-  Zap,
-  Shield,
-  Receipt,
-  CheckSquare,
-  Undo,
-  RefreshCw,
-  X,
-  DollarSign,
-  TrendingDown,
-  ArrowUpRight,
-  ArrowDownRight,
-  PackageOpen,
-  FolderTree,
-  BadgePercent,
-  BarChart,
-  LineChart,
-  PieChart as PieChartIcon,
-  ShoppingBasket,
-  Percent,
-  Target,
   Activity,
-  Calendar,
-  TrendingUp as TrendingUpIcon
+  Cpu,
+  MemoryStick,
+  RefreshCw,
+  Plus,
+  Users,
+  Shield,
+  MapPin,
+  MessageSquare,
+  BarChart3,
+  ChevronUp,
+  ChevronDown,
+  Clock,
+  Server,
+  WifiOff,
+  ShieldCheck,
+  Settings,
+  ShieldAlert,
+  Home,
 } from "lucide-react";
-import { BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart as ReLineChart, Line, Cell } from "recharts";
 import { useRouter } from "next/navigation";
 import CustomToast from "@/components/customtoast";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
-// Portal Modal Component
-const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    return () => setMounted(false);
-  }, []);
-
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
-
-  if (!mounted || !isOpen) return null;
-
-  const sizeClasses = {
-    sm: "max-w-md",
-    md: "max-w-lg",
-    lg: "max-w-2xl",
-    xl: "max-w-4xl"
-  };
-
-  const modalContent = (
-    <div className="fixed inset-0 flex items-center justify-center p-4 z-[9999]">
-      <div
-        onClick={onClose}
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300"
-      ></div>
-
-      <div
-        className={`relative bg-card rounded-2xl shadow-2xl transform transition-all duration-300 p-6 w-full max-h-[90vh] overflow-y-auto ${sizeClasses[size]}`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between mb-6 pb-4 border-b">
-          <h3 className="text-xl font-semibold text-foreground">{title}</h3>
-          <button
-            onClick={onClose}
-            className="text-muted-foreground hover:text-foreground transition-colors p-2 rounded-full hover:bg-accent"
-            aria-label="Close modal"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-        {children}
-      </div>
-    </div>
-  );
-
-  return createPortal(modalContent, document.body);
-};
-
-// Custom Tooltip for Charts
-const CustomTooltip = ({ active, payload, label }) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-card p-4 border rounded-lg shadow-lg">
-        <p className="font-semibold text-foreground">{label}</p>
-        {payload.map((entry, index) => (
-          <p key={index} className="text-sm text-muted-foreground mt-1">
-            <span className="font-medium" style={{ color: entry.color }}>{entry.name}:</span> {entry.value} {entry.name === 'Revenue' ? 'USD' : ''}
-          </p>
-        ))}
-      </div>
-    );
-  }
-  return null;
-};
-
-// Stat Card Component - Mobile optimized
-const StatCard = ({ title, value, icon: Icon, color, isLoading, subtitle, trend, prefix = "", suffix = "" }) => {
+// Stat Card Component - Using your color system
+const StatCard = ({ title, value, icon: Icon, color, subtitle, trend, isLoading, suffix = "" }) => {
   const colorClasses = {
     primary: { 
       bg: "bg-primary/10", 
@@ -159,278 +55,151 @@ const StatCard = ({ title, value, icon: Icon, color, isLoading, subtitle, trend,
       text: "text-destructive",
       border: "border-destructive/20"
     },
-    success: { 
-      bg: "bg-green-100", 
-      icon: "text-green-600", 
-      text: "text-green-600",
-      border: "border-green-200"
-    },
-    warning: { 
-      bg: "bg-yellow-100", 
-      icon: "text-yellow-600", 
-      text: "text-yellow-600",
-      border: "border-yellow-200"
+    accent: { 
+      bg: "bg-accent/10", 
+      icon: "text-accent", 
+      text: "text-accent",
+      border: "border-accent/20"
     }
   };
 
   const colors = colorClasses[color] || colorClasses.primary;
 
   return (
-    <div className="bg-card rounded-xl p-4 sm:p-6 shadow-sm border hover:shadow-md transition-all duration-300 hover:border-border/50">
+    <div className={`bg-card rounded-xl p-4 shadow-sm border hover:shadow-md transition-all duration-300 hover:border-border/50 h-full ${colors.border}`}>
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">{title}</p>
           {isLoading ? (
-            <div className="h-6 sm:h-8 w-20 sm:w-24 bg-muted rounded-lg animate-pulse mt-1"></div>
+            <div className="h-7 w-24 bg-muted rounded animate-pulse mt-1"></div>
           ) : (
             <>
-              <div className={`text-lg sm:text-2xl font-bold ${colors.text} mb-1`}>
-                {prefix}
+              <div className={`text-xl sm:text-2xl font-bold ${colors.text} mb-1`}>
                 {typeof value === "number" && value > 1000 ? value.toLocaleString() : value}
                 {suffix}
               </div>
               {subtitle && (
                 <p className="text-xs text-muted-foreground truncate">{subtitle}</p>
               )}
-              {trend && (
-                <div className={`flex items-center text-xs mt-1 ${trend.value > 0 ? 'text-green-600' : trend.value < 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
-                  {trend.value > 0 ? (
-                    <ArrowUpRight className="h-3 w-3 mr-1" />
-                  ) : trend.value < 0 ? (
-                    <ArrowDownRight className="h-3 w-3 mr-1" />
-                  ) : null}
-                  {trend.value !== 0 && `${trend.value > 0 ? '+' : ''}${trend.value}%`} {trend.label}
-                </div>
-              )}
             </>
           )}
         </div>
-        <div className={`p-2 sm:p-3 rounded-xl ${colors.bg} border ${colors.border}`}>
-          <Icon className="h-4 w-4 sm:h-6 sm:w-6" />
+        <div className={`p-2 sm:p-3 rounded-lg ${colors.bg} border ${colors.border}`}>
+          <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
         </div>
       </div>
     </div>
   );
 };
 
-// Quick Action Button Component - Mobile optimized
-const QuickActionButton = ({ icon: Icon, title, onClick, color, description }) => {
+// Status Badge Component - Using your color system
+const StatusBadge = ({ status }) => {
+  const statusConfig = {
+    online: { label: "Online", variant: "success" },
+    offline: { label: "Offline", variant: "destructive" },
+    warning: { label: "Warning", variant: "warning" },
+    critical: { label: "Critical", variant: "destructive" },
+  };
+
+  const config = statusConfig[status] || statusConfig.online;
+
+  return (
+    <Badge variant={config.variant}>
+      {config.label}
+    </Badge>
+  );
+};
+
+// Quick Action Button Component - 2 columns on mobile, 4 on desktop
+const QuickActionButton = ({ icon: Icon, title, onClick, color }) => {
   const colorClasses = {
     primary: { 
-      bg: "bg-primary/10", 
-      icon: "text-primary", 
-      hover: "hover:bg-primary/20",
+      bg: "bg-primary/10 hover:bg-primary/20", 
+      icon: "text-primary",
       border: "border-primary/20"
     },
     secondary: { 
-      bg: "bg-secondary/10", 
-      icon: "text-secondary", 
-      hover: "hover:bg-secondary/20",
+      bg: "bg-secondary/10 hover:bg-secondary/20", 
+      icon: "text-secondary",
       border: "border-secondary/20"
     },
-    success: { 
-      bg: "bg-green-100", 
-      icon: "text-green-600", 
-      hover: "hover:bg-green-200",
-      border: "border-green-200"
+    accent: { 
+      bg: "bg-accent/10 hover:bg-accent/20", 
+      icon: "text-accent",
+      border: "border-accent/20"
+    },
+    default: { 
+      bg: "bg-muted hover:bg-accent", 
+      icon: "text-muted-foreground",
+      border: "border-border"
     }
   };
 
-  const colors = colorClasses[color] || colorClasses.primary;
+  const colors = colorClasses[color] || colorClasses.default;
 
   return (
     <button
       onClick={onClick}
-      className={`flex items-start p-3 sm:p-4 ${colors.bg} ${colors.hover} rounded-xl transition-all duration-200 text-left group border ${colors.border} hover:border-border w-full`}
+      className={`flex flex-col items-center justify-center p-3 ${colors.bg} rounded-lg transition-all duration-200 text-center group border ${colors.border} hover:border-primary/30 w-full`}
       aria-label={title}
     >
-      <div className={`p-2 rounded-lg ${colors.bg} group-hover:scale-110 transition-transform duration-200 mr-3 border ${colors.border}`}>
-        <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+      <div className={`p-2 rounded-lg ${colors.bg} group-hover:scale-110 transition-transform duration-200 mb-2 border ${colors.border}`}>
+        <Icon className="h-5 w-5" />
       </div>
-      <div className="flex-1 min-w-0">
-        <span className="font-semibold text-foreground block mb-1 text-sm sm:text-base">{title}</span>
-        {description && (
-          <span className="text-xs text-muted-foreground block truncate">{description}</span>
-        )}
-      </div>
+      <span className="font-medium text-foreground text-xs sm:text-sm">{title}</span>
     </button>
   );
 };
 
-// Notice Card Component
-const NoticeCard = ({ type, title, message, icon: Icon, action }) => {
-  const typeClasses = {
-    warning: {
-      bg: "bg-yellow-50",
-      iconBg: "bg-yellow-100",
-      iconColor: "text-yellow-600",
-      text: "text-yellow-900",
-      subtitle: "text-yellow-700"
-    },
-    info: {
-      bg: "bg-blue-50",
-      iconBg: "bg-blue-100",
-      iconColor: "text-blue-600",
-      text: "text-blue-900",
-      subtitle: "text-blue-700"
-    },
-    success: {
-      bg: "bg-green-50",
-      iconBg: "bg-green-100",
-      iconColor: "text-green-600",
-      text: "text-green-900",
-      subtitle: "text-green-700"
-    }
-  };
-
-  const styles = typeClasses[type] || typeClasses.info;
+// Router Tile Component - Using your color system
+const RouterTile = ({ router, onClick }) => {
 
   return (
-    <div className={`p-3 sm:p-4 rounded-xl border ${styles.bg}`}>
-      <div className="flex items-start space-x-3">
-        <div className={`p-1.5 sm:p-2 rounded-full ${styles.iconBg}`}>
-          <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+    <div 
+      className="flex items-center justify-between p-3 bg-card rounded-lg border hover:bg-accent transition-colors cursor-pointer"
+      onClick={onClick}
+    >
+      <div className="flex items-center gap-3">
+        <div className={`p-2 rounded-lg ${router.status === "online" ? "bg-primary/10" : "bg-muted"}`}>
+          <Router className={`h-4 w-4 ${router.status === "online" ? "text-primary" : "text-muted-foreground"}`} />
         </div>
-        <div className="flex-1 min-w-0">
-          <h3 className={`text-sm font-semibold ${styles.text} truncate`}>
-            {title}
-          </h3>
-          <p className={`text-xs sm:text-sm mt-1 ${styles.subtitle} line-clamp-2`}>
-            {message}
-          </p>
-          {action && (
-            <button className={`text-xs font-medium mt-2 ${styles.subtitle} hover:underline`}>
-              {action}
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Category Distribution Card - Replaces Pie Chart
-const CategoryDistributionCard = ({ categories, totalProducts, isLoading }) => {
-  if (isLoading) {
-    return (
-      <div className="bg-card rounded-2xl p-4 sm:p-6 shadow-sm border">
-        <div className="h-8 bg-muted rounded-lg animate-pulse mb-4"></div>
-        <div className="space-y-3">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="flex items-center justify-between animate-pulse">
-              <div className="h-4 bg-muted rounded w-1/3"></div>
-              <div className="h-4 bg-muted rounded w-1/4"></div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (!categories || categories.length === 0) {
-    return (
-      <div className="bg-card rounded-2xl p-4 sm:p-6 shadow-sm border text-center">
-        <FolderTree className="h-12 w-12 mx-auto mb-3 text-muted" />
-        <p className="font-medium text-foreground">No categories available</p>
-        <p className="text-sm text-muted-foreground mt-1">Add categories to see distribution</p>
-      </div>
-    );
-  }
-
-  const sortedCategories = [...categories].sort((a, b) => b.value - a.value);
-
-  return (
-    <div className="bg-card rounded-2xl p-4 sm:p-6 shadow-sm border">
-      <div className="flex items-center justify-between mb-4 sm:mb-6">
         <div>
-          <h3 className="text-base sm:text-lg font-semibold text-foreground">Top Categories</h3>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1">By product count</p>
+          <p className="font-medium text-foreground text-sm">{router.name}</p>
+          <p className="text-xs text-muted-foreground">{router.ip}</p>
         </div>
-        <Link
-          href="/dashboard/products/categories"
-          className="text-primary hover:text-primary/80 font-medium text-sm flex items-center gap-1"
-        >
-          View All
-          <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4" />
-        </Link>
       </div>
-
-      <div className="space-y-3 sm:space-y-4">
-        {sortedCategories.slice(0, 5).map((category, index) => {
-          const percentage = totalProducts > 0 ? (category.value / totalProducts) * 100 : 0;
-          return (
-            <div key={index} className="flex items-center justify-between p-2 sm:p-3 hover:bg-accent rounded-lg transition-colors">
-              <div className="flex items-center space-x-2 sm:space-x-3 flex-1">
-                <div className="flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${category.color}20` }}>
-                  <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full" style={{ backgroundColor: category.color }}></div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-foreground text-sm sm:text-base truncate">{category.name}</p>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 bg-muted rounded-full h-1.5 sm:h-2 overflow-hidden">
-                      <div 
-                        className="h-full rounded-full transition-all duration-500" 
-                        style={{ 
-                          width: `${percentage}%`,
-                          backgroundColor: category.color
-                        }}
-                      ></div>
-                    </div>
-                    <span className="text-xs font-medium text-muted-foreground">{percentage.toFixed(1)}%</span>
-                  </div>
-                </div>
-              </div>
-              <div className="text-right ml-2 sm:ml-4">
-                <p className="font-semibold text-foreground text-sm sm:text-base">{category.value}</p>
-                <p className="text-xs text-muted-foreground">${category.amount?.toLocaleString() || '0'}</p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {sortedCategories.length > 5 && (
-        <div className="mt-4 pt-4 border-t">
-          <Link
-            href="/dashboard/products/categories"
-            className="text-center block text-primary hover:text-primary/80 font-medium text-sm"
-          >
-            View {sortedCategories.length - 5} more categories →
-          </Link>
-        </div>
-      )}
+      <StatusBadge status={router.status} />
     </div>
   );
 };
 
 export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
-  const [showModal, setShowModal] = useState(null);
   const [userData, setUserData] = useState(null);
-  const [showNotifications, setShowNotifications] = useState(true);
+  
+  // Dashboard stats
   const [stats, setStats] = useState({
-    totalProducts: 0,
-    totalOrders: 0,
-    totalCustomers: 0,
-    todayRevenue: 0,
-    pendingOrders: 0,
-    lowStockProducts: 0,
-    monthlySales: 0,
-    conversionRate: 0,
-    averageOrderValue: 0,
-    returnedOrders: 0,
-    activeCampaigns: 0,
-    inventoryValue: 0,
-    discountActive: 0,
-    abandonedCarts: 0
+    totalRouters: 0,
+    totalAPs: 0,
+    issuesThisMonth: 0,
+    recentEvents: 0,
+    onlineRouters: 0,
+    onlineAPs: 0,
+    dhcpConflicts: 0,
+    newHosts: 0,
+    unregisteredAPs: 0,
+    cpuAverage: 0,
+    memoryAverage: 0,
+    activeAlerts: 0,
+    networkHealth: 0,
+    securityScore: 0,
+    uptime24h: 0,
   });
-  const [categoryDistribution, setCategoryDistribution] = useState([]);
-  const [recentOrders, setRecentOrders] = useState([]);
-  const [alerts, setAlerts] = useState([]);
-  const [salesData, setSalesData] = useState([]);
-  const [performanceMetrics, setPerformanceMetrics] = useState([]);
 
-  const router = useRouter();
+  const [routers, setRouters] = useState([]);
+  const [recentEvents, setRecentEvents] = useState([]);
+
+  const routerNav = useRouter();
 
   const [toast, setToast] = useState({
     message: "",
@@ -454,26 +223,6 @@ export default function Dashboard() {
     setToast(prev => ({ ...prev, isVisible: false }));
   };
 
-  // Check for notification preference cookie on mount
-  useEffect(() => {
-    const hiddenPref = Cookies.get("hide_dashboard_notifications");
-    if (hiddenPref === "true") {
-      setShowNotifications(false);
-    }
-  }, []);
-
-  // Handler to toggle notifications
-  const toggleNotifications = () => {
-    const newState = !showNotifications;
-    setShowNotifications(newState);
-    
-    if (newState === false) {
-      Cookies.set("hide_dashboard_notifications", "true", { expires: 7 });
-    } else {
-      Cookies.remove("hide_dashboard_notifications");
-    }
-  };
-
   // Get user data from cookie
   useEffect(() => {
     const userCookie = Cookies.get("user_data");
@@ -485,16 +234,16 @@ export default function Dashboard() {
         console.error("Error parsing user cookie:", error);
         showToast("Invalid user session. Please login again.", "error");
         setTimeout(() => {
-          router.push("/login");
+          routerNav.push("/login");
         }, 2000);
       }
     } else {
       showToast("No user session found. Please login.", "error");
       setTimeout(() => {
-        router.push("/login");
+        routerNav.push("/login");
       }, 2000);
     }
-  }, [router]);
+  }, [routerNav]);
 
   // Simulate fetching dashboard data
   useEffect(() => {
@@ -504,126 +253,71 @@ export default function Dashboard() {
       // Simulate API call
       setTimeout(() => {
         setStats({
-          totalProducts: 1564,
-          totalOrders: 289,
-          totalCustomers: 1247,
-          todayRevenue: 15480,
-          pendingOrders: 45,
-          lowStockProducts: 23,
-          monthlySales: 125400,
-          conversionRate: 3.2,
-          averageOrderValue: 124.50,
-          returnedOrders: 12,
-          activeCampaigns: 5,
-          inventoryValue: 250000,
-          discountActive: 8,
-          abandonedCarts: 42
+          totalRouters: 5,
+          totalAPs: 23,
+          issuesThisMonth: 8,
+          recentEvents: 12,
+          onlineRouters: 5,
+          onlineAPs: 21,
+          dhcpConflicts: 3,
+          newHosts: 15,
+          unregisteredAPs: 2,
+          cpuAverage: 42,
+          memoryAverage: 68,
+          activeAlerts: 5,
+          networkHealth: 85,
+          securityScore: 92,
+          uptime24h: 99.8,
         });
 
-        setCategoryDistribution([
-          { name: "Electronics", value: 450, color: "#3B82F6", amount: 45000 },
-          { name: "Fashion", value: 320, color: "#8B5CF6", amount: 32000 },
-          { name: "Home & Garden", value: 280, color: "#10B981", amount: 28000 },
-          { name: "Books", value: 210, color: "#F59E0B", amount: 21000 },
-          { name: "Sports", value: 180, color: "#EF4444", amount: 18000 },
-          { name: "Beauty", value: 150, color: "#06B6D4", amount: 15000 }
+        setRouters([
+          { id: 1, name: "Main Router", ip: "192.168.1.1", status: "online" },
+          { id: 2, name: "Branch Office", ip: "192.168.2.1", status: "online" },
+          { id: 3, name: "Warehouse", ip: "192.168.3.1", status: "warning" },
+          { id: 4, name: "Retail Store", ip: "192.168.4.1", status: "online" },
+          { id: 5, name: "Backup Router", ip: "192.168.5.1", status: "offline" },
         ]);
 
-        setRecentOrders([
-          { id: 1, customer: "John Doe", amount: 249.99, status: "Delivered", time: "2 hours ago", items: 3 },
-          { id: 2, customer: "Jane Smith", amount: 149.50, status: "Processing", time: "4 hours ago", items: 2 },
-          { id: 3, customer: "Robert Johnson", amount: 89.99, status: "Shipped", time: "6 hours ago", items: 1 },
-          { id: 4, customer: "Sarah Wilson", amount: 329.99, status: "Pending", time: "1 day ago", items: 5 },
-          { id: 5, customer: "Michael Brown", amount: 199.99, status: "Delivered", time: "1 day ago", items: 4 }
-        ]);
-
-        setAlerts([
-          { type: "warning", title: "Low Stock Alert", message: "23 products are running low in inventory" },
-          { type: "info", title: "New Campaign Live", message: "Summer Sale campaign is now active" },
-          { type: "success", title: "Record Sales", message: "Highest daily revenue recorded yesterday" }
-        ]);
-
-        setSalesData([
-          { day: "Mon", revenue: 4500, orders: 45 },
-          { day: "Tue", revenue: 5200, orders: 52 },
-          { day: "Wed", revenue: 4800, orders: 48 },
-          { day: "Thu", revenue: 6200, orders: 62 },
-          { day: "Fri", revenue: 7100, orders: 71 },
-          { day: "Sat", revenue: 8900, orders: 89 },
-          { day: "Sun", revenue: 7600, orders: 76 }
-        ]);
-
-        setPerformanceMetrics([
-          { name: "Page Views", value: 12450, change: 12 },
-          { name: "Conversion", value: 3.2, change: 0.8, suffix: "%" },
-          { name: "Avg. Session", value: 4.2, change: -0.3, suffix: "min" },
-          { name: "Bounce Rate", value: 42, change: -5, suffix: "%" }
+        setRecentEvents([
+          { id: 1, type: "new_host", message: "New device: iPhone-13", time: "5 min ago" },
+          { id: 2, type: "ap_online", message: "AP-02 came online", time: "10 min ago" },
+          { id: 3, type: "config_change", message: "Router config updated", time: "1 hour ago" },
+          { id: 4, type: "security_scan", message: "Security scan completed", time: "3 hours ago" },
+          { id: 5, type: "dhcp_conflict", message: "DHCP conflict detected", time: "4 hours ago" },
         ]);
 
         setIsLoading(false);
-      }, 1500);
+      }, 1000);
     };
 
     fetchDashboardData();
   }, []);
 
-  // Quick actions handlers based on sidebar navigation
+  // 4 Quick Actions - 2 columns on mobile, 4 on desktop
   const quickActions = [
     {
       icon: Plus,
-      title: "Add Product",
-      description: "Create new product listing",
+      title: "Add Router",
       color: "primary",
-      onClick: () => router.push("/dashboard/products/add")
+      onClick: () => routerNav.push("/dashboard/routers/add")
     },
     {
-      icon: ShoppingCart,
-      title: "View Orders",
-      description: "Manage customer orders",
+      icon: Wifi,
+      title: "Add AP",
       color: "secondary",
-      onClick: () => router.push("/dashboard/orders")
+      onClick: () => routerNav.push("/dashboard/access-points/add")
     },
     {
-      icon: Users,
-      title: "Customers",
-      description: "View customer database",
-      color: "success",
-      onClick: () => router.push("/dashboard/customers")
+      icon: Activity,
+      title: "Monitoring",
+      color: "accent",
+      onClick: () => routerNav.push("/dashboard/monitoring")
     },
     {
-      icon: Megaphone,
-      title: "Marketing",
-      description: "Create campaigns & discounts",
+      icon: Shield,
+      title: "Security",
       color: "primary",
-      onClick: () => router.push("/dashboard/marketing")
-    },
-    {
-      icon: Layers,
-      title: "Inventory",
-      description: "Manage stock levels",
-      color: "secondary",
-      onClick: () => router.push("/dashboard/inventory")
-    },
-    {
-      icon: BarChart3,
-      title: "Reports",
-      description: "Generate analytics reports",
-      color: "success",
-      onClick: () => router.push("/dashboard/reports")
-    },
-    {
-      icon: Notebook,
-      title: "Notes",
-      description: "Take quick notes",
-      color: "primary",
-      onClick: () => router.push("/dashboard/notes")
-    },
-    {
-      icon: Settings,
-      title: "Settings",
-      description: "Configure store settings",
-      color: "secondary",
-      onClick: () => router.push("/dashboard/system")
+      onClick: () => routerNav.push("/dashboard/monitoring/security")
     },
   ];
 
@@ -640,7 +334,7 @@ export default function Dashboard() {
           <div className="max-w-7xl mx-auto py-4 sm:py-6 lg:py-8">
             <div className="flex items-center justify-center min-h-[400px]">
               <div className="text-center">
-                <RotateCw className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+                <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
                 <p className="text-muted-foreground">Loading user session...</p>
               </div>
             </div>
@@ -660,369 +354,290 @@ export default function Dashboard() {
       />
 
       <DashboardLayout>
-        <div className="max-w-7xl mx-auto py-4 sm:py-6 space-y-4 sm:space-y-6">
-          {/* Header Section - Mobile optimized */}
+        <div className="max-w-7xl py-4 sm:py-6 space-y-4 sm:space-y-6">
+          {/* Header Section */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <div className="flex-1">
-               <p className="text-muted-foreground mt-1 text-sm sm:text-base">
-                Admin • Bidhaa Mart
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Network Dashboard</h1>
+              <p className="text-muted-foreground mt-1 text-sm sm:text-base">
+                Welcome back, {userData?.username || "Admin"} • Stream Mikrotik Monitor
               </p>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
-              <button
-                onClick={() => router.push('/dashboard/notes')}
-                title="Open notepad"
-                aria-label="Open notepad"
-                className="flex items-center px-2 sm:px-3 py-2 bg-card border rounded-lg hover:bg-accent transition-colors"
-              >
-                <Notebook className="h-4 w-4 text-muted-foreground" />
-                <span className="hidden sm:inline ml-2 text-sm text-foreground">Notes</span>
-              </button>
-              <button
+              <Button
                 onClick={() => window.location.reload()}
                 disabled={isLoading}
-                className="flex items-center px-3 sm:px-4 py-2 bg-card border rounded-lg hover:bg-accent transition-colors disabled:opacity-50"
+                variant="outline"
+                size="sm"
+                className="gap-2"
               >
-                <RefreshCw className="h-4 w-4" />
-                <span className="hidden sm:inline ml-2">Refresh</span>
-              </button>
+                <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+                <span className="hidden sm:inline">Refresh</span>
+              </Button>
             </div>
           </div>
 
-          {/* Alerts / Notifications Panel - Mobile optimized */}
-          {alerts.length > 0 && !isLoading && (
-            <div className="bg-card rounded-xl shadow-sm border overflow-hidden">
-              {/* Notifications Header with Toggle Button */}
-              <div className="px-4 sm:px-6 py-3 sm:py-4 border-b flex items-center justify-between bg-accent/50">
-                <div className="flex items-center gap-2">
-                  <div className="relative">
-                    <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
-                    {showNotifications && (
-                      <span className="absolute -top-1 -right-1 h-2 w-2 sm:h-2.5 sm:w-2.5 bg-destructive rounded-full animate-pulse"></span>
-                    )}
-                  </div>
-                  <h3 className="font-semibold text-foreground text-sm sm:text-base">
-                    Notifications
-                    <span className="ml-2 text-xs font-normal text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">
-                      {alerts.length}
-                    </span>
-                  </h3>
-                </div>
-
-                <button
-                  onClick={toggleNotifications}
-                  className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg border text-xs sm:text-sm font-medium transition-all duration-200 ${
-                    showNotifications 
-                    ? 'bg-card border-border text-foreground hover:bg-accent' 
-                    : 'bg-primary/10 border-primary/20 text-primary hover:bg-primary/20'
-                  }`}
-                >
-                  {showNotifications ? (
-                    <>
-                      <EyeOff className="h-3 w-3 sm:h-4 sm:w-4" />
-                      <span className="hidden sm:inline">Hide</span>
-                    </>
-                  ) : (
-                    <>
-                      <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
-                      <span className="hidden sm:inline">Show</span>
-                    </>
-                  )}
-                </button>
-              </div>
-
-              {/* Collapsible Content */}
-              {showNotifications && (
-                <div className="p-4 sm:p-6 grid gap-3 sm:gap-4 bg-card animate-in fade-in slide-in-from-top-2 duration-300">
-                  {alerts.map((alert, index) => (
-                    <NoticeCard
-                      key={index}
-                      type={alert.type}
-                      icon={alert.type === "warning" ? AlertCircle : alert.type === "success" ? CheckCircle : Bell}
-                      title={alert.title}
-                      message={alert.message}
-                      action="View Details"
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Key Metrics Grid - Mobile optimized */}
+          {/* First Row - Key Metrics */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
             <StatCard
-              title="Total Products"
-              value={stats.totalProducts}
-              icon={Package2}
+              title="Total Routers"
+              value={stats.totalRouters}
+              icon={Router}
               color="primary"
               isLoading={isLoading}
-              trend={{ value: 8, label: "from last month" }}
+              subtitle={`${stats.onlineRouters} online`}
+              trend={{ value: 0, label: "stable" }}
             />
             <StatCard
-              title="Today's Orders"
-              value={stats.totalOrders}
-              icon={ShoppingCart}
+              title="Total APs"
+              value={stats.totalAPs}
+              icon={Wifi}
+              color="secondary"
+              isLoading={isLoading}
+              subtitle={`${stats.onlineAPs} online`}
+              trend={{ value: 12, label: "this month" }}
+            />
+            <StatCard
+              title="Network Health"
+              value={`${stats.networkHealth}%`}
+              icon={Activity}
+              color="accent"
+              isLoading={isLoading}
+              subtitle="Overall status"
+              trend={{ value: 5, label: "improving" }}
+            />
+            <StatCard
+              title="Security Score"
+              value={`${stats.securityScore}%`}
+              icon={ShieldCheck}
               color="primary"
               isLoading={isLoading}
-              subtitle={`${stats.pendingOrders} pending`}
-              trend={{ value: 12, label: "vs yesterday" }}
-            />
-            <StatCard
-              title="Today's Revenue"
-              value={stats.todayRevenue}
-              icon={DollarSign}
-              color="success"
-              isLoading={isLoading}
-              prefix="$"
-              subtitle={`Avg: $${stats.averageOrderValue}`}
-              trend={{ value: 15, label: "growth" }}
-            />
-            <StatCard
-              title="Customers"
-              value={stats.totalCustomers}
-              icon={Users}
-              color="warning"
-              isLoading={isLoading}
-              subtitle={`${stats.conversionRate}% conversion`}
-              trend={{ value: 5, label: "from last week" }}
+              subtitle="System security"
             />
           </div>
 
-          {/* Second Row Metrics - Mobile optimized */}
+          {/* Second Row - More Metrics */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
             <StatCard
-              title="Pending Orders"
-              value={stats.pendingOrders}
-              icon={Clock}
-              color="destructive"
-              isLoading={isLoading}
-              subtitle="Need attention"
-            />
-            <StatCard
-              title="Low Stock"
-              value={stats.lowStockProducts}
+              title="Active Alerts"
+              value={stats.activeAlerts}
               icon={AlertCircle}
               color="destructive"
               isLoading={isLoading}
-              subtitle="Need restocking"
+              subtitle="Require attention"
             />
             <StatCard
-              title="Monthly Sales"
-              value={stats.monthlySales}
-              icon={TrendingUpIcon}
-              color="primary"
+              title="New Hosts"
+              value={stats.newHosts}
+              icon={Users}
+              color="secondary"
               isLoading={isLoading}
-              prefix="$"
-              trend={{ value: 18, label: "vs last month" }}
+              subtitle="Last 24 hours"
+              trend={{ value: 25, label: "increase" }}
             />
             <StatCard
-              title="Return Rate"
-              value={`${((stats.returnedOrders / stats.totalOrders) * 100 || 0).toFixed(1)}%`}
-              icon={Undo}
-              color="warning"
+              title="DHCP Conflicts"
+              value={stats.dhcpConflicts}
+              icon={ShieldAlert}
+              color="destructive"
               isLoading={isLoading}
-              subtitle={`${stats.returnedOrders} returns`}
+              subtitle="Current issues"
+            />
+            <StatCard
+              title="24h Uptime"
+              value={`${stats.uptime24h}%`}
+              icon={Clock}
+              color="accent"
+              isLoading={isLoading}
+              subtitle="Network availability"
             />
           </div>
 
-          {/* Charts & Data Section - Mobile optimized */}
+          {/* Main Content Area */}
           <div className="grid lg:grid-cols-2 gap-4 sm:gap-8">
-            {/* Sales Trend Chart */}
-            <div className="bg-card rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm border">
-              <div className="flex items-center justify-between mb-4 sm:mb-6">
-                <div>
-                  <h3 className="text-base sm:text-lg font-semibold text-foreground">Weekly Sales Trend</h3>
-                  <p className="text-muted-foreground text-xs sm:text-sm mt-1">Revenue over the past week</p>
-                </div>
-                <Link
-                  href="/dashboard/reports"
-                  className="text-primary hover:text-primary/80 font-medium text-xs sm:text-sm flex items-center gap-1"
-                >
-                  Details
-                  <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4" />
-                </Link>
-              </div>
-
-              {isLoading ? (
-                <div className="h-48 sm:h-80 bg-muted rounded-xl animate-pulse"></div>
-              ) : (
-                <div className="h-48 sm:h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <ReLineChart data={salesData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="oklch(var(--border))" />
-                      <XAxis 
-                        dataKey="day" 
-                        stroke="black"
-                        fontSize={12}
-                      />
-                      <YAxis 
-                        stroke="black"
-                        fontSize={12}
-                      />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Line 
-                        type="monotone" //all types are 1.monotone 2
-                        dataKey="revenue" 
-                        stroke="green"
-                        strokeWidth={2}
-                        dot={{ r: 2 }}
-                        activeDot={{ r: 6 }}
-                      />
-                    </ReLineChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
-            </div>
-
-            {/* Category Distribution Card - Replaces Pie Chart */}
-            <CategoryDistributionCard 
-              categories={categoryDistribution}
-              totalProducts={stats.totalProducts}
-              isLoading={isLoading}
-            />
-          </div>
-
-          {/* Performance Metrics */}
-          <div className="bg-card rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm border">
-            <div className="flex items-center justify-between mb-4 sm:mb-6">
-              <div>
-                <h3 className="text-base sm:text-lg font-semibold text-foreground">Performance Metrics</h3>
-                <p className="text-muted-foreground text-xs sm:text-sm mt-1">Key store performance indicators</p>
-              </div>
-              <Link
-                href="/dashboard/analytics"
-                className="text-primary hover:text-primary/80 font-medium text-xs sm:text-sm flex items-center gap-1"
-              >
-                Analytics
-                <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4" />
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-              {performanceMetrics.map((metric, index) => (
-                <div key={index} className="bg-accent p-3 sm:p-4 rounded-lg border">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs sm:text-sm font-medium text-muted-foreground">{metric.name}</span>
-                    <span className={`text-xs font-medium ${metric.change > 0 ? 'text-green-600' : 'text-destructive'}`}>
-                      {metric.change > 0 ? '+' : ''}{metric.change}{metric.suffix || ''}
-                    </span>
+            {/* Router Status */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Router Status</CardTitle>
+                    <CardDescription>All Mikrotik routers in your network</CardDescription>
                   </div>
-                  <div className="text-lg sm:text-2xl font-bold text-foreground">
-                    {metric.value.toLocaleString()}{metric.suffix || ''}
-                  </div>
+                  <Link
+                    href="/dashboard/routers"
+                    className="text-sm text-primary hover:underline font-medium"
+                  >
+                    View All →
+                  </Link>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Bottom Section - Mobile optimized */}
-          <div className="grid lg:grid-cols-2 gap-4 sm:gap-8">
-            {/* Recent Orders - Mobile optimized */}
-            <div className="bg-card rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm border">
-              <div className="flex items-center justify-between mb-4 sm:mb-6">
-                <div>
-                  <h3 className="text-base sm:text-lg font-semibold text-foreground">Recent Orders</h3>
-                  <p className="text-muted-foreground text-xs sm:text-sm mt-1">Latest customer transactions</p>
-                </div>
-                <Link
-                  href="/dashboard/orders"
-                  className="text-primary hover:text-primary/80 font-medium text-xs sm:text-sm"
-                >
-                  View All
-                </Link>
-              </div>
-
-              {isLoading ? (
-                <div className="space-y-3">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="flex items-center space-x-3 animate-pulse">
-                      <div className="h-8 w-8 sm:h-10 sm:w-10 bg-muted rounded-full"></div>
-                      <div className="flex-1 space-y-2">
-                        <div className="h-3 sm:h-4 bg-muted rounded w-3/4"></div>
-                        <div className="h-2 sm:h-3 bg-muted rounded w-1/2"></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : recentOrders.length > 0 ? (
-                <div className="space-y-3">
-                  {recentOrders.slice(0, 4).map((order) => (
-                    <div
-                      key={order.id}
-                      className="flex items-center justify-between p-2 sm:p-3 hover:bg-accent rounded-lg transition-colors group"
-                    >
-                      <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
-                        <div className={`h-8 w-8 sm:h-10 sm:w-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                          order.status === 'Delivered' ? 'bg-green-100' :
-                          order.status === 'Processing' ? 'bg-blue-100' :
-                          order.status === 'Shipped' ? 'bg-purple-100' :
-                          'bg-yellow-100'
-                        }`}>
-                          {order.status === 'Delivered' ? <CheckCircle className="h-4 w-4 text-green-600" /> :
-                           order.status === 'Processing' ? <Clock className="h-4 w-4 text-blue-600" /> :
-                           order.status === 'Shipped' ? <Truck className="h-4 w-4 text-purple-600" /> :
-                           <AlertCircle className="h-4 w-4 text-yellow-600" />}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-medium text-foreground text-sm sm:text-base truncate">{order.customer}</p>
-                          <p className="text-xs text-muted-foreground truncate">{order.items} items • {order.time}</p>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="space-y-3">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="flex items-center space-x-3 animate-pulse">
+                        <div className="h-10 w-10 bg-muted rounded-lg"></div>
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-muted rounded w-3/4"></div>
+                          <div className="h-3 bg-muted rounded w-1/2"></div>
                         </div>
                       </div>
-                      <div className="text-right ml-2 flex-shrink-0">
-                        <span className="font-semibold text-foreground text-sm sm:text-base block">
-                          ${order.amount.toFixed(2)}
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {routers.map((routerData) => (
+                      <RouterTile
+                        key={routerData.id}
+                        router={routerData}
+                        onClick={() => routerNav.push(`/dashboard/routers/${routerData.id}`)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Recent Network Events */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Recent Events</CardTitle>
+                    <CardDescription>Latest network activities</CardDescription>
+                  </div>
+                  <Link
+                    href="/dashboard/monitoring"
+                    className="text-sm text-primary hover:underline font-medium"
+                  >
+                    View All →
+                  </Link>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="space-y-3">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="flex items-center justify-between animate-pulse">
+                        <div className="h-4 bg-muted rounded w-3/4"></div>
+                        <div className="h-3 bg-muted rounded w-1/4"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : recentEvents.length > 0 ? (
+                  <div className="space-y-2">
+                    {recentEvents.map((event) => (
+                      <div
+                        key={event.id}
+                        className="flex items-center justify-between p-2 hover:bg-accent rounded-lg transition-colors"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className={`p-1.5 rounded ${
+                            event.type === 'new_host' ? 'bg-primary/10 text-primary' :
+                            event.type === 'ap_online' ? 'bg-secondary/10 text-secondary' :
+                            event.type === 'security_scan' ? 'bg-accent/10 text-accent' :
+                            event.type === 'dhcp_conflict' ? 'bg-destructive/10 text-destructive' :
+                            'bg-muted text-muted-foreground'
+                          }`}>
+                            {event.type === 'new_host' ? <Users className="h-3 w-3" /> :
+                             event.type === 'ap_online' ? <Wifi className="h-3 w-3" /> :
+                             event.type === 'security_scan' ? <Shield className="h-3 w-3" /> :
+                             event.type === 'dhcp_conflict' ? <AlertCircle className="h-3 w-3" /> :
+                             <Activity className="h-3 w-3" />}
+                          </div>
+                          <span className="text-sm truncate">{event.message}</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
+                          {event.time}
                         </span>
-                        <p className={`text-xs font-medium ${
-                          order.status === 'Delivered' ? 'text-green-600' :
-                          order.status === 'Processing' ? 'text-blue-600' :
-                          order.status === 'Shipped' ? 'text-purple-600' :
-                          'text-yellow-600'
-                        }`}>
-                          {order.status}
-                        </p>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-6 sm:py-8 text-muted-foreground">
-                  <ShoppingCart className="h-8 w-8 sm:h-12 sm:w-12 mx-auto mb-3 text-muted" />
-                  <p className="text-sm sm:text-base">No recent orders</p>
-                </div>
-              )}
-            </div>
-
-            {/* Quick Actions - Mobile optimized */}
-            <div className="bg-card rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm border">
-              <div className="flex items-center justify-between mb-4 sm:mb-6">
-                <div>
-                  <h3 className="text-base sm:text-lg font-semibold text-foreground">Quick Actions</h3>
-                  <p className="text-muted-foreground text-xs sm:text-sm mt-1">Manage your store efficiently</p>
-                </div>
-                <Link
-                  href="/dashboard"
-                  className="text-primary hover:text-primary/80 font-medium text-xs sm:text-sm"
-                >
-                  View All
-                </Link>
-              </div>
-              <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                {quickActions.slice(0, 4).map((action, index) => (
-                  <QuickActionButton key={index} {...action} />
-                ))}
-              </div>
-              <div className="grid grid-cols-2 gap-2 sm:gap-3 mt-2 sm:mt-3">
-                {quickActions.slice(4, 8).map((action, index) => (
-                  <QuickActionButton key={index} {...action} />
-                ))}
-              </div>
-            </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 text-muted-foreground">
+                    <Activity className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p>No recent events</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
+
+          {/* Quick Actions Grid - 2 columns on mobile, 4 on desktop */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+              <CardDescription>Common network management tasks</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {quickActions.map((action, index) => (
+                  <QuickActionButton key={index} {...action} />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* System Status Summary */}
+          <Card>
+            <CardHeader>
+              <CardTitle>System Status</CardTitle>
+              <CardDescription>Overall network status summary</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="p-4 rounded-lg border bg-card">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold">Router Health</h4>
+                    <Badge variant={stats.onlineRouters === stats.totalRouters ? "secondary" : "destructive"}>
+                      {((stats.onlineRouters / stats.totalRouters) * 100).toFixed(0)}%
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {stats.onlineRouters} of {stats.totalRouters} routers online
+                  </p>
+                </div>
+                
+                <div className="p-4 rounded-lg border bg-card">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold">AP Coverage</h4>
+                    <Badge variant={stats.unregisteredAPs === 0 ? "secondary" : "destructive"}>
+                      {((stats.onlineAPs / stats.totalAPs) * 100).toFixed(0)}%
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {stats.onlineAPs} of {stats.totalAPs} APs online
+                  </p>
+                </div>
+                
+                <div className="p-4 rounded-lg border bg-card">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold">Issues This Month</h4>
+                    <Badge variant={stats.issuesThisMonth === 0 ? "secondary" : "destructive"}>
+                      {stats.issuesThisMonth}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {stats.dhcpConflicts} conflicts • {stats.activeAlerts} alerts
+                  </p>
+                </div>
+                
+                <div className="p-4 rounded-lg border bg-card">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold">Recent Activity</h4>
+                    <Badge variant="default">
+                      {stats.recentEvents}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {stats.newHosts} new hosts • {stats.recentEvents} events
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </DashboardLayout>
-
-      {/* Modals - Removed for simplicity, can be re-added as needed */}
     </>
   );
 }
