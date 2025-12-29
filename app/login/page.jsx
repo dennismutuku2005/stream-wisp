@@ -11,6 +11,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react"
 import Image from "next/image"
 import Cookies from "js-cookie"
 import CustomToast from "@/components/customtoast"
+import Link from "next/link"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -196,7 +197,138 @@ export default function LoginPage() {
       />
 
       <div className="min-h-screen flex bg-background">
-        <div className="flex-1 flex items-center justify-center">
+        {/* Mobile Layout Only - Logo at Top */}
+        <div className="block lg:hidden w-full">
+          <div className="pt-8 px-6">
+            <Image
+              src="/logos/logo.png"
+              alt="One Network Logo"
+              width={180}
+              height={90}
+              className="mx-auto mb-4"
+              priority
+            />
+            <p className="text-center text-sm text-muted-foreground mb-8">
+              Sign in with your account
+            </p>
+          </div>
+          
+          <div className="flex items-center justify-center px-4">
+            <Card className="w-full max-w-md">
+              <CardContent className="px-6 py-8">
+                <form onSubmit={handleLogin} onKeyDown={handleKeyPress}>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="identifier" className="text-sm font-medium">
+                        Username, Email or Mobile
+                      </Label>
+                      <Input
+                        id="identifier"
+                        type="text"
+                        placeholder="Enter username, email or mobile"
+                        value={identifier}
+                        onChange={(e) => setIdentifier(e.target.value)}
+                        className="h-12 px-4"
+                        autoComplete="username"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+                      <div className="relative">
+                        <Input
+                          id="password"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Enter your password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="pr-12 h-12 px-4"
+                          autoComplete="current-password"
+                          required
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 rounded-md"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1">
+                      <div className="flex items-center space-x-2.5">
+                        <Checkbox
+                          id="remember"
+                          checked={rememberMe}
+                          onCheckedChange={(val) => setRememberMe(!!val)}
+                          className="h-5 w-5"
+                        />
+                        <Label htmlFor="remember" className="text-sm font-medium cursor-pointer">
+                          Remember me
+                        </Label>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="text-sm font-medium p-0 h-auto"
+                      >
+                        Forgot password?
+                      </Button>
+                    </div>
+
+                    <Button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full h-14 font-medium rounded-lg mt-4"
+                    >
+                      {isLoading ? <Loader2 className="h-5 w-5 text-2xl font-bold animate-spin mx-auto" /> : "Sign in"}
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Mobile Footer Links */}
+          <div className="mt-8 px-6 text-center">
+            <div className="flex flex-wrap justify-center gap-3 text-xs text-muted-foreground mb-3">
+              <Link 
+                href="/terms" 
+                className="hover:text-foreground transition-colors"
+              >
+                Terms of Service
+              </Link>
+              <span className="text-border">•</span>
+              <Link 
+                href="/privacy" 
+                className="hover:text-foreground transition-colors"
+              >
+                Privacy Policy
+              </Link>
+              <span className="text-border">•</span>
+              <Link 
+                href="/cookie-policy" 
+                className="hover:text-foreground transition-colors"
+              >
+                Cookie Policy
+              </Link>
+            </div>
+            <p className="text-xs text-muted-foreground/70">
+              © {new Date().getFullYear()} One Network. All rights reserved.
+            </p>
+          </div>
+        </div>
+
+        {/* Desktop Layout - UNCHANGED from original */}
+        <div className="hidden lg:flex flex-1 items-center justify-center">
           <div className="w-full max-w-md space-y-6">
             <Card>
               <CardHeader className="text-center pb-3 pt-8">
@@ -289,11 +421,32 @@ export default function LoginPage() {
                     </Button>
                   </div>
                 </form>
+
+                {/* Desktop Footer Links (optional - you can add if you want them on desktop too) */}
+                <div className="mt-8 pt-6 border-t border-border text-center">
+                  <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground mb-2">
+                    <Link href="/terms" className="hover:text-foreground transition-colors">
+                      Terms
+                    </Link>
+                    <span className="text-border">•</span>
+                    <Link href="/privacy" className="hover:text-foreground transition-colors">
+                      Privacy
+                    </Link>
+                    <span className="text-border">•</span>
+                    <Link href="/cookie-policy" className="hover:text-foreground transition-colors">
+                      Cookies
+                    </Link>
+                  </div>
+                  <p className="text-xs text-muted-foreground/70">
+                    © {new Date().getFullYear()} One Network. All rights reserved.
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </div>
         </div>
 
+        {/* Side image - Desktop only (unchanged) */}
         <div className="hidden lg:flex flex-1 relative">
           <Image
             src="/images/sideimage.png"
