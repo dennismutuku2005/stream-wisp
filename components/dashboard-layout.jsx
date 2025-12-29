@@ -8,46 +8,60 @@ import { Sheet, SheetContent } from "@/components/ui/sheet"
 import {
   Menu,
   Home,
-  ShoppingBag,
+  Router,
+  Wifi,
   Users,
-  Package,
-  Tag,
   Settings,
-  TrendingUp,
-  FileText,
-  BarChart3,
   Bell,
-  CreditCard,
-  Receipt,
   Search,
   User,
-  Phone,
   ChevronRight,
   Eye,
   Plus,
-  LayoutGrid,
-  Megaphone,
   Shield,
   AlertCircle,
   FileBarChart,
-  Notebook,
   Layers,
-  Star,
-  ShoppingCart,
-  Truck,
-  Calendar,
-  BadgePercent,
-  Wallet,
+  Activity,
+  Network,
+  MapPin,
+  MessageSquare,
+  Smartphone,
+  Server,
+  Globe,
+  ShieldCheck,
+  WifiOff,
+  Cpu,
+  HardDrive,
+  MemoryStick,
+  Signal,
+  BarChart3,
+  History,
   Zap,
-  Image as ImageIcon,
-  BookOpen,
-  FolderTree,
-  Filter,
-  Package2,
-  CircleDollarSign,
-  PackageOpen,
-  ClipboardList,
-  Store,
+  Download,
+  Upload,
+  Lock,
+  Unlock,
+  Map,
+  MessageCircle,
+  Smartphone as PhoneIcon,
+  Phone,
+  HelpCircle,
+  Info,
+  Badge,
+  Terminal,
+  Code,
+  Database,
+
+  ShieldAlert,
+  Network as NetworkIcon,
+  Wifi as WifiIcon,
+  Router as RouterIcon,
+  Users as UsersIcon,
+  Book,
+  Video,
+
+
 } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -63,107 +77,88 @@ const navigation = [
     icon: Home,
   },
   {
-    name: "Products",
-    href: "/dashboard/products",
-    icon: ShoppingBag,
+    name: "Mikrotik Routers",
+    href: "/dashboard/routers",
+    icon: RouterIcon,
     submenu: [
-      { name: "All Products", href: "/dashboard/products", icon: Package2, badge: "123" },
-      { name: "Add Product", href: "/dashboard/products/add", icon: Plus },
-      { name: "Categories", href: "/dashboard/products/categories", icon: FolderTree },
-      { name: "Discounted", href: "/dashboard/products/discounted", icon: BadgePercent, badge: "45" },
-      { name: "Low Stock", href: "/dashboard/products/low-stock", icon: AlertCircle, badge: "12" },
-      { name: "Featured", href: "/dashboard/products/featured", icon: Star },
+      { name: "All Routers", href: "/dashboard/routers", icon: Server, badge: "5" },
+      { name: "Add Router", href: "/dashboard/routers/add", icon: Plus },
+      { name: "Router Groups", href: "/dashboard/routers/groups", icon: Layers },
+      { name: "Offline Routers", href: "/dashboard/routers/offline", icon: WifiOff, badge: "0" },
+      { name: "High Load", href: "/dashboard/routers/load", icon: Cpu, badge: "1" },
     ],
   },
   {
-    name: "Orders",
-    href: "/dashboard/orders",
-    icon: ShoppingCart,
+    name: "Access Points",
+    href: "/dashboard/access-points",
+    icon: Badge,
     submenu: [
-      { name: "All Orders", href: "/dashboard/orders", icon: ClipboardList, badge: "56" },
-      { name: "Pending", href: "/dashboard/orders/pending", icon: Clock, badge: "12" },
-      { name: "Processing", href: "/dashboard/orders/processing", icon: RefreshCw, badge: "8" },
-      { name: "Shipped", href: "/dashboard/orders/shipped", icon: Truck, badge: "15" },
-      { name: "Delivered", href: "/dashboard/orders/delivered", icon: CheckCircle },
-      { name: "Cancelled", href: "/dashboard/orders/cancelled", icon: XCircle },
-      { name: "Returns", href: "/dashboard/orders/returns", icon: Undo, badge: "3" },
+      { name: "All APs", href: "/dashboard/access-points", icon: Badge, badge: "23" },
+      { name: "Add AP", href: "/dashboard/access-points/add", icon: Plus },
+      { name: "Unregistered APs", href: "/dashboard/access-points/unregistered", icon: ShieldAlert, badge: "2" },
+      { name: "AP Locations", href: "/dashboard/access-points/locations", icon: MapPin },
     ],
   },
   {
-    name: "Customers",
-    href: "/dashboard/customers",
-    icon: Users,
+    name: "Network Monitoring",
+    href: "/dashboard/monitoring",
+    icon: Activity,
     submenu: [
-      { name: "All Customers", href: "/dashboard/customers", icon: Users },
-      { name: "Add Customer", href: "/dashboard/customers/add", icon: UserPlus },
-      { name: "Segments", href: "/dashboard/customers/segments", icon: Filter },
-      { name: "Reviews", href: "/dashboard/customers/reviews", icon: Star },
+      { name: "Live Traffic", href: "/dashboard/monitoring/traffic", icon: Activity },
+      { name: "DHCP Conflicts", href: "/dashboard/monitoring/conflicts", icon: AlertCircle, badge: "3" },
+      { name: "New Hosts", href: "/dashboard/monitoring/new-hosts", icon: UsersIcon, badge: "5" },
+      { name: "MAC Tracking", href: "/dashboard/monitoring/mac", icon: NetworkIcon },
+      { name: "IP Addresses", href: "/dashboard/monitoring/ips", icon: Globe },
     ],
   },
   {
-    name: "Marketing",
-    href: "/dashboard/marketing",
-    icon: Megaphone,
+    name: "Alerts & Notifications",
+    href: "/dashboard/alerts",
+    icon: Bell,
     submenu: [
-      { name: "Campaigns", href: "/dashboard/marketing/campaigns", icon: TrendingUp },
-      { name: "Email Marketing", href: "/dashboard/marketing/email", icon: Mail },
-      { name: "Banners", href: "/dashboard/marketing/banners", icon: ImageIcon },
-      { name: "Discounts", href: "/dashboard/marketing/discounts", icon: Tag },
-      { name: "Coupons", href: "/dashboard/marketing/coupons", icon: Ticket },
-    ],
-  },
-  {
-    name: "Inventory",
-    href: "/dashboard/inventory",
-    icon: PackageOpen,
-    submenu: [
-      { name: "Stock Levels", href: "/dashboard/inventory", icon: Layers },
-      { name: "Warehouses", href: "/dashboard/inventory/warehouses", icon: Store },
-      { name: "Suppliers", href: "/dashboard/inventory/suppliers", icon: Truck },
-      { name: "Purchase Orders", href: "/dashboard/inventory/purchase-orders", icon: ClipboardCheck },
+      { name: "All Alerts", href: "/dashboard/alerts", icon: Bell, badge: "8" },
+      { name: "WhatsApp Alerts", href: "/dashboard/alerts/whatsapp", icon: MessageSquare },
+      { name: "SMS Alerts", href: "/dashboard/alerts/sms", icon: PhoneIcon },
+      { name: "Email Alerts", href: "/dashboard/alerts/email", icon: Mail },
+      { name: "Alert Rules", href: "/dashboard/alerts/rules", icon: ShieldCheck },
     ],
   },
   {
     name: "Reports",
     href: "/dashboard/reports",
-    icon: BarChart3,
+    icon: FileBarChart,
     submenu: [
-      { name: "Sales Report", href: "/dashboard/reports/sales", icon: TrendingUp },
-      { name: "Revenue", href: "/dashboard/reports/revenue", icon: CircleDollarSign },
-      { name: "Customer Insights", href: "/dashboard/reports/customers", icon: Users },
-      { name: "Product Performance", href: "/dashboard/reports/products", icon: Package2 },
-      { name: "Inventory Report", href: "/dashboard/reports/inventory", icon: PackageOpen },
+      { name: "Network Health", href: "/dashboard/reports/health", icon: BarChart3 },
+      { name: "Router Performance", href: "/dashboard/reports/routers", icon: RouterIcon },
+      { name: "AP Performance", href: "/dashboard/reports/aps", icon: Wifi },
+      { name: "Security Logs", href: "/dashboard/reports/security", icon: Shield },
+      { name: "Traffic History", href: "/dashboard/reports/traffic", icon: History },
     ],
   },
   {
-    name: "Notes",
-    href: "/dashboard/notes",
-    icon: Notebook,
-    submenu: [
-      { name: "All Notes", href: "/dashboard/notes", icon: Notebook },
-      { name: "Quick Notes", href: "/dashboard/notes/quick", icon: FileText },
-      { name: "Tasks", href: "/dashboard/notes/tasks", icon: CheckSquare },
-    ],
-  },
-  {
-    name: "System",
-    href: "/dashboard/system",
+    name: "Settings",
+    href: "/dashboard/settings",
     icon: Settings,
     submenu: [
-      { name: "Settings", href: "/dashboard/system/settings", icon: Settings },
-      { name: "Staff Management", href: "/dashboard/system/staff", icon: Users },
-      { name: "Payment Methods", href: "/dashboard/system/payments", icon: CreditCard },
-      { name: "Shipping Methods", href: "/dashboard/system/shipping", icon: Truck },
-      { name: "Tax Settings", href: "/dashboard/system/tax", icon: Receipt },
-      { name: "Privacy Policy", href: "/dashboard/system/privacy", icon: Shield },
-      { name: "Update Center", href: "/dashboard/system/updates", icon: Zap },
+      { name: "General", href: "/dashboard/settings/general", icon: Settings },
+      { name: "Personalization", href: "/dashboard/settings/personalization", icon: Zap },
+      { name: "Notification Settings", href: "/dashboard/settings/notifications", icon: Bell },
+      { name: "API Configuration", href: "/dashboard/settings/api", icon: Code },
+      { name: "Backup & Restore", href: "/dashboard/settings/backup", icon: Database },
+      { name: "Security", href: "/dashboard/settings/security", icon: Lock },
     ],
   },
   {
-    name: "Notifications",
-    href: "/dashboard/notifications",
-    icon: Bell,
-    badge: "3",
+    name: "Help & Support",
+    href: "/dashboard/help",
+    icon: HelpCircle,
+    submenu: [
+      { name: "Documentation", href: "/dashboard/help/docs", icon: Book },
+      { name: "Tutorials", href: "/dashboard/help/tutorials", icon: Video },
+      { name: "FAQ", href: "/dashboard/help/faq", icon: HelpCircle },
+      { name: "Contact Support", href: "/dashboard/help/contact", icon: MessageCircle },
+      { name: "System Info", href: "/dashboard/help/system", icon: Info },
+    ],
   },
 ]
 
@@ -254,11 +249,11 @@ export function DashboardLayout({ children }) {
   const [isCardOpen, setIsCardOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [expandedItems, setExpandedItems] = useState({})
-  
+
   const sidebarRef = useRef(null)
   const scrollPositionRef = useRef(0)
   const restoreScrollTimeoutRef = useRef(null)
-  
+
   const pathname = usePathname()
   const router = useRouter()
 
@@ -343,18 +338,18 @@ export function DashboardLayout({ children }) {
   const toggleSubmenu = (itemName) => {
     // Save current scroll position
     saveScrollPosition()
-    
+
     // Clear any existing timeout
     if (restoreScrollTimeoutRef.current) {
       clearTimeout(restoreScrollTimeoutRef.current)
     }
-    
+
     // Update expanded state
     setExpandedItems(prev => ({
       ...prev,
       [itemName]: !prev[itemName]
     }))
-    
+
     // Restore scroll position after DOM update
     restoreScrollTimeoutRef.current = setTimeout(() => {
       restoreScrollPosition()
@@ -365,7 +360,7 @@ export function DashboardLayout({ children }) {
   useEffect(() => {
     const newExpandedItems = { ...expandedItems }
     let hasChanges = false
-    
+
     // Find the parent menu item for the current path
     navigation.forEach(item => {
       if (item.submenu) {
@@ -376,7 +371,7 @@ export function DashboardLayout({ children }) {
         }
       }
     })
-    
+
     // Only update if there are changes
     if (hasChanges) {
       setExpandedItems(newExpandedItems)
@@ -420,7 +415,7 @@ export function DashboardLayout({ children }) {
         <div className="flex items-center space-x-3">
           <div className="flex-shrink-0 relative w-8 h-8">
             <Image
-              src="/logos/logo.png"
+              src="/logos/primarylogo.png"
               alt="Ecommerce Logo"
               width={32}
               height={32}
@@ -428,14 +423,14 @@ export function DashboardLayout({ children }) {
             />
           </div>
           <div>
-            <h1 className="text-sm font-semibold whitespace-nowrap">Bidhaa Mart</h1>
-            <p className="text-xs text-muted-foreground whitespace-nowrap">Admin Panel</p>
+            <h1 className="text-sm font-semibold whitespace-nowrap">Stream V1.0.0</h1>
+            <p className="text-xs text-muted-foreground whitespace-nowrap">Monitor Panel</p>
           </div>
         </div>
       </div>
 
       {/* Navigation - Scrollable with scroll preservation */}
-      <div 
+      <div
         ref={sidebarRef}
         className="flex-1 overflow-y-auto"
         onScroll={() => {
@@ -451,7 +446,7 @@ export function DashboardLayout({ children }) {
             const hasSubmenu = item.submenu && item.submenu.length > 0
             const isExpanded = expandedItems[item.name]
             const Icon = item.icon
-            
+
             return (
               <div key={item.name}>
                 <Link
@@ -477,7 +472,7 @@ export function DashboardLayout({ children }) {
                       {item.name}
                     </span>
                   </div>
-                  
+
                   <div className="flex items-center gap-2">
                     {item.badge && (
                       <span className="bg-primary text-primary-foreground text-xs rounded-full px-2 py-0.5">
