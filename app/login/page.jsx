@@ -16,21 +16,19 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [identifier, setIdentifier] = useState("") // username or mobile
+  const [identifier, setIdentifier] = useState("")
   const [password, setPassword] = useState("")
   const [showLoadingScreen, setShowLoadingScreen] = useState(false)
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true) // New state to track auth check
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
 
-  // Custom toast states
   const [toast, setToast] = useState({
     message: "",
-    type: "error", // 'success' or 'error'
+    type: "error",
     isVisible: false
   })
 
   const router = useRouter()
 
-  // Custom toast function
   const showToast = (message, type = "error") => {
     setToast({
       message,
@@ -38,7 +36,6 @@ export default function LoginPage() {
       isVisible: true
     })
 
-    // Auto hide after 5 seconds
     setTimeout(() => {
       setToast(prev => ({ ...prev, isVisible: false }))
     }, 5000)
@@ -49,32 +46,52 @@ export default function LoginPage() {
   }
 
   useEffect(() => {
-    const checkAuthStatus = () => {
+    const checkAuthStatus = async () => {
       try {
         const cookieData = Cookies.get("user_data")
-        if (cookieData) {
-          // Parse the cookie to validate it's proper JSON
-          JSON.parse(cookieData)
-          setShowLoadingScreen(true)
-          setTimeout(() => {
-            router.push("/dashboard")
-          }, 1000)
-          return
+        const token = Cookies.get("auth_token")
+        
+        if (cookieData && token) {
+          try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/validate_token.php`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ token }),
+            })
+            
+            const data = await res.json()
+            
+            if (data.valid) {
+              setShowLoadingScreen(true)
+              setTimeout(() => {
+                router.push("/dashboard")
+              }, 1000)
+              return
+            } else {
+              Cookies.remove("user_data")
+              Cookies.remove("auth_token")
+            }
+          } catch (err) {
+            console.error("Token validation error:", err)
+            Cookies.remove("user_data")
+            Cookies.remove("auth_token")
+          }
         }
       } catch (err) {
-        console.error("Cookie parsing error:", err)
-        // If cookie is corrupted, remove it
+        console.error("Auth check error:", err)
         Cookies.remove("user_data")
+        Cookies.remove("auth_token")
       }
 
-      // If no valid user data, show login page
       setIsCheckingAuth(false)
     }
 
     checkAuthStatus()
   }, [router])
 
-  const handleLogin = async () => {
+  const handleLogin = async (e) => {
+    if (e) e.preventDefault()
+    
     if (!identifier || !password) {
       showToast("Please fill in all fields", "error")
       return
@@ -83,10 +100,15 @@ export default function LoginPage() {
     setIsLoading(true)
     setShowLoadingScreen(true)
 
-    // Build payload dynamically (if digits → mobile, else → username)
-    const payload = /^\d+$/.test(identifier)
-      ? { mobile: identifier, password }
-      : { username: identifier, password }
+    const payload = { password }
+    
+    if (/^\d+$/.test(identifier)) {
+      payload.mobile = identifier
+    } else if (identifier.includes('@')) {
+      payload.email = identifier
+    } else {
+      payload.username = identifier
+    }
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login.php`, {
@@ -97,50 +119,63 @@ export default function LoginPage() {
 
       const contentType = res.headers.get("content-type")
       if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Response is not JSON")
+        throw new Error("Invalid response format")
       }
 
       const data = await res.json()
       console.log("🔑 Login Response:", data)
 
       if (!res.ok) {
-        showToast(data.message || "❌ Login failed", "error")
-        setShowLoadingScreen(false)
-        return
+        throw new Error(data.message || "Login failed")
       }
 
-      if (data.success) {
-        if (rememberMe) {
-          Cookies.set("user_data", JSON.stringify(data), { expires: 7 })
-        } else {
-          Cookies.set("user_data", JSON.stringify(data), { expires: 1 })
+      if (data.success && data.user) {
+        const userData = {
+          user: data.user,
+          token: data.token || data.user.token,
+          timestamp: new Date().toISOString()
         }
-
+        
+        const expires = rememberMe ? 7 : 1
+        
+        Cookies.set("user_data", JSON.stringify(userData.user), { expires })
+        Cookies.set("auth_token", userData.token, { expires })
+        
+        if (typeof window !== 'undefined') {
+          localStorage.setItem("user_data", JSON.stringify(userData.user))
+          localStorage.setItem("auth_token", userData.token)
+        }
+        
         showToast("✅ Login successful!", "success")
-        // Keep loading screen visible while redirecting
-        setTimeout(() => router.push("/dashboard"), 2000)
+        
+        const redirectPath = data.user.role === 'admin' ? '/admin/dashboard' : '/dashboard'
+        setTimeout(() => router.push(redirectPath), 1500)
+        
       } else {
-        showToast(data.message || "❌ Login failed", "error")
-        setShowLoadingScreen(false)
+        throw new Error(data.message || "Invalid credentials")
       }
+      
     } catch (err) {
       console.error("❌ Login error:", err)
-      showToast("Something went wrong. Please try again.", "error")
+      showToast(err.message || "Something went wrong. Please try again.", "error")
       setShowLoadingScreen(false)
     } finally {
       setIsLoading(false)
     }
   }
 
-  // Show loading screen while checking authentication or during login
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleLogin()
+    }
+  }
+
   if (isCheckingAuth || showLoadingScreen) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="text-center space-y-4">
           <div className="relative mx-auto w-16 h-16">
-            {/* Outer ring */}
             <div className="absolute inset-0 rounded-full border-4 border-muted"></div>
-            {/* Animated ring */}
             <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
           </div>
           <div className="text-sm text-muted-foreground">
@@ -153,7 +188,6 @@ export default function LoginPage() {
 
   return (
     <>
-      {/* Custom Toast Component */}
       <CustomToast
         message={toast.message}
         type={toast.type}
@@ -162,11 +196,9 @@ export default function LoginPage() {
       />
 
       <div className="min-h-screen flex bg-background">
-        {/* Left Side */}
         <div className="flex-1 flex items-center justify-center">
           <div className="w-full max-w-md space-y-6">
-
-            <Card className="">
+            <Card>
               <CardHeader className="text-center pb-3 pt-8">
                 <Image
                   src="/logos/logo.png"
@@ -174,90 +206,94 @@ export default function LoginPage() {
                   width={200}
                   height={100}
                   className="mx-auto mb-4"
+                  priority
                 />
                 <p className="text-sm text-muted-foreground">Sign in with your account</p>
               </CardHeader>
 
               <CardContent className="px-6 pb-8">
-                <div className="space-y-4">
-                  {/* Username or Mobile */}
-                  <div className="space-y-2">
-                    <Label htmlFor="identifier" className="text-sm font-medium">Username or Mobile</Label>
-                    <Input
-                      id="identifier"
-                      type="text"
-                      placeholder="Enter your username or mobile"
-                      value={identifier}
-                      onChange={(e) => setIdentifier(e.target.value)}
-                      className="h-12 px-4"
-                    />
-                  </div>
-
-                  {/* Password */}
-                  <div className="space-y-2">
-                    <Label htmlFor="password" className="text-sm font-medium">Password</Label>
-                    <div className="relative">
+                <form onSubmit={handleLogin} onKeyDown={handleKeyPress}>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="identifier" className="text-sm font-medium">
+                        Username, Email or Mobile
+                      </Label>
                       <Input
-                        id="password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Enter your password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="pr-12 h-12 px-4"
+                        id="identifier"
+                        type="text"
+                        placeholder="Enter username, email or mobile"
+                        value={identifier}
+                        onChange={(e) => setIdentifier(e.target.value)}
+                        className="h-12 px-4"
+                        autoComplete="username"
+                        required
                       />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+                      <div className="relative">
+                        <Input
+                          id="password"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Enter your password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="pr-12 h-12 px-4"
+                          autoComplete="current-password"
+                          required
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 rounded-md"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1">
+                      <div className="flex items-center space-x-2.5">
+                        <Checkbox
+                          id="remember"
+                          checked={rememberMe}
+                          onCheckedChange={(val) => setRememberMe(!!val)}
+                          className="h-5 w-5"
+                        />
+                        <Label htmlFor="remember" className="text-sm font-medium cursor-pointer">
+                          Remember me
+                        </Label>
+                      </div>
                       <Button
                         type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 rounded-md"
-                        onClick={() => setShowPassword(!showPassword)}
+                        variant="link"
+                        className="text-sm font-medium p-0 h-auto"
                       >
-                        {showPassword ? (
-                          <EyeOff className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <Eye className="h-4 w-4 text-muted-foreground" />
-                        )}
+                        Forgot password?
                       </Button>
                     </div>
-                  </div>
 
-                  {/* Remember Me */}
-                  <div className="flex items-center justify-between pt-1">
-                    <div className="flex items-center space-x-2.5">
-                      <Checkbox
-                        id="remember"
-                        checked={rememberMe}
-                        onCheckedChange={(val) => setRememberMe(!!val)}
-                        className="h-5 w-5"
-                      />
-                      <Label htmlFor="remember" className="text-sm font-medium cursor-pointer">
-                        Remember me
-                      </Label>
-                    </div>
                     <Button
-                      type="button"
-                      variant="link"
-                      className="text-sm font-medium p-0 h-auto"
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full h-14 font-medium rounded-lg mt-4"
                     >
-                      Forgot password?
+                      {isLoading ? <Loader2 className="h-5 w-5 text-2xl font-bold animate-spin mx-auto" /> : "Sign in"}
                     </Button>
                   </div>
-
-                  {/* Submit */}
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full h-14 font-medium rounded-lg mt-4"
-                    onClick={handleLogin}
-                  >
-                    {isLoading ? <Loader2 className="h-5 w-5 text-2xl font-bold animate-spin mx-auto" /> : "Sign in"}
-                  </Button>
-                </div>
+                </form>
               </CardContent>
-            </Card> </div>
+            </Card>
+          </div>
         </div>
 
-        {/* Right Side Image */}
         <div className="hidden lg:flex flex-1 relative">
           <Image
             src="/images/sideimage.png"
