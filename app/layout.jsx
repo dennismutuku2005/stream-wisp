@@ -1,14 +1,15 @@
 import { Analytics } from "@vercel/analytics/next"
 import { Josefin_Sans, Inter } from "next/font/google"
 import "./globals.css"
-//want to add metadata now
+
 export const metadata = {
-  title: "BidhaaMart | Your Number One Online Plug",
-  description: "Your trusted online plug for quality gadgets and essentials. Best deals, fast delivery, real plug energy.",
+  title: "Stream-Mikrotik | Network Monitoring Made Simple",
+  description:
+    "Stream-Mikrotik is a clean, modern network monitoring tool for MikroTik routers. Track traffic, streams, and performance in real time.",
   openGraph: {
     images: ["/webimages/og-image.png"],
   },
-  themeColor: "#e1f77e",
+  themeColor: "#25D366",
 }
 
 const josefinSans = Josefin_Sans({
@@ -29,9 +30,12 @@ export default function RootLayout({ children }) {
     <html lang="en" className={`${josefinSans.variable} ${inter.variable}`}>
       <head>
         <link rel="icon" href="/favicon.png" />
-        <meta name="theme-color" content="#e1f77e" />
-        <meta name="msapplication-TileColor" content="#e1f77e" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="theme-color" content="#25D366" />
+        <meta name="msapplication-TileColor" content="#25D366" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="black-translucent"
+        />
       </head>
       <body className="antialiased">
         {children}
