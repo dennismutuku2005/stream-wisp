@@ -17,6 +17,7 @@ import {
   ChevronRight,
   TrendingUp,
   TrendingDown,
+  Badge,
 } from "lucide-react";
 
 // Mock user data
@@ -234,7 +235,7 @@ export default function Dashboard() {
     { icon: Plus, title: "Add Router", color: "primary", onClick: () => {} },
     { icon: Wifi, title: "Add AP", color: "secondary", onClick: () => {} },
     { icon: Activity, title: "Monitoring", color: "accent", onClick: () => {} },
-    { icon: Shield, title: "Security", color: "primary", onClick: () => {} },
+    { icon: Badge, title: "Security", color: "primary", onClick: () => {} },
   ];
 
   return (
