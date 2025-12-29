@@ -1,4 +1,4 @@
-```markdown
+
 # Stream-Mikrotik
 
 ![Stream-Mikrotik Logo](public/logo/logo.png)
@@ -137,4 +137,3 @@ A monitoring tool for MikroTik networks built with Next.js that tracks access po
 ---
 
 *Note: This tool is designed for network administrators and requires appropriate permissions for all monitored devices.*
-```
