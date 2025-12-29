@@ -1,7 +1,7 @@
 
 # Stream-Mikrotik
 
-![Stream-Mikrotik Logo](public/logo/logo.png)
+![Stream-Mikrotik Logo](public/logos/logo.png)
 
 ## Overview
 A monitoring tool for MikroTik networks built with Next.js that tracks access point status and DHCP server health in real-time.
