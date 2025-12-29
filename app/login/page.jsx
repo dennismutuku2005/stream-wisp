@@ -52,35 +52,15 @@ export default function LoginPage() {
         const token = Cookies.get("auth_token")
         
         if (cookieData && token) {
-          try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/validate_token.php`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ token }),
-            })
-            
-            const data = await res.json()
-            
-            if (data.valid) {
-              setShowLoadingScreen(true)
-              setTimeout(() => {
-                router.push("/dashboard")
-              }, 1000)
-              return
-            } else {
-              Cookies.remove("user_data")
-              Cookies.remove("auth_token")
-            }
-          } catch (err) {
-            console.error("Token validation error:", err)
-            Cookies.remove("user_data")
-            Cookies.remove("auth_token")
-          }
+          // Auto-login if cookies exist
+          setShowLoadingScreen(true)
+          setTimeout(() => {
+            router.push("/dashboard")
+          }, 1000)
+          return
         }
       } catch (err) {
         console.error("Auth check error:", err)
-        Cookies.remove("user_data")
-        Cookies.remove("auth_token")
       }
 
       setIsCheckingAuth(false)
@@ -100,66 +80,41 @@ export default function LoginPage() {
     setIsLoading(true)
     setShowLoadingScreen(true)
 
-    const payload = { password }
-    
-    if (/^\d+$/.test(identifier)) {
-      payload.mobile = identifier
-    } else if (identifier.includes('@')) {
-      payload.email = identifier
-    } else {
-      payload.username = identifier
-    }
-
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login.php`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      })
-
-      const contentType = res.headers.get("content-type")
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Invalid response format")
+      // Generate a mock user based on the identifier
+      const mockUser = {
+        id: Date.now(),
+        username: identifier.includes('@') ? identifier.split('@')[0] : identifier,
+        email: identifier.includes('@') ? identifier : `${identifier}@example.com`,
+        mobile: /^\d+$/.test(identifier) ? identifier : "1234567890",
+        role: identifier.toLowerCase().includes('admin') ? 'admin' : 'user',
+        name: identifier.charAt(0).toUpperCase() + identifier.slice(1),
+        token: `mock_token_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        timestamp: new Date().toISOString()
       }
-
-      const data = await res.json()
-      console.log("🔑 Login Response:", data)
-
-      if (!res.ok) {
-        throw new Error(data.message || "Login failed")
+      
+      const expires = rememberMe ? 7 : 1
+      
+      // Save to cookies
+      Cookies.set("user_data", JSON.stringify(mockUser), { expires })
+      Cookies.set("auth_token", mockUser.token, { expires })
+      
+      // Save to localStorage for immediate access
+      if (typeof window !== 'undefined') {
+        localStorage.setItem("user_data", JSON.stringify(mockUser))
+        localStorage.setItem("auth_token", mockUser.token)
       }
-
-      if (data.success && data.user) {
-        const userData = {
-          user: data.user,
-          token: data.token || data.user.token,
-          timestamp: new Date().toISOString()
-        }
-        
-        const expires = rememberMe ? 7 : 1
-        
-        Cookies.set("user_data", JSON.stringify(userData.user), { expires })
-        Cookies.set("auth_token", userData.token, { expires })
-        
-        if (typeof window !== 'undefined') {
-          localStorage.setItem("user_data", JSON.stringify(userData.user))
-          localStorage.setItem("auth_token", userData.token)
-        }
-        
-        showToast("✅ Login successful!", "success")
-        
-        const redirectPath = data.user.role === 'admin' ? '/admin/dashboard' : '/dashboard'
-        setTimeout(() => router.push(redirectPath), 1500)
-        
-      } else {
-        throw new Error(data.message || "Invalid credentials")
-      }
+      
+      showToast(`✅ Login successful as ${mockUser.name}!`, "success")
+      
+      // Redirect based on role
+      const redirectPath = mockUser.role === 'admin' ? '/admin/dashboard' : '/dashboard'
+      setTimeout(() => router.push(redirectPath), 1500)
       
     } catch (err) {
       console.error("❌ Login error:", err)
-      showToast(err.message || "Something went wrong. Please try again.", "error")
+      showToast("Something went wrong. Please try again.", "error")
       setShowLoadingScreen(false)
-    } finally {
       setIsLoading(false)
     }
   }
@@ -208,7 +163,8 @@ export default function LoginPage() {
                   className="mx-auto mb-4"
                   priority
                 />
-                <p className="text-sm text-muted-foreground">Sign in with your account</p>
+                <p className="text-sm text-muted-foreground">Welcome Back</p>
+              
               </CardHeader>
 
               <CardContent className="px-6 pb-8">
@@ -221,7 +177,7 @@ export default function LoginPage() {
                       <Input
                         id="identifier"
                         type="text"
-                        placeholder="Enter username, email or mobile"
+                        placeholder="Enter any username, email or mobile"
                         value={identifier}
                         onChange={(e) => setIdentifier(e.target.value)}
                         className="h-12 px-4"
@@ -236,7 +192,7 @@ export default function LoginPage() {
                         <Input
                           id="password"
                           type={showPassword ? "text" : "password"}
-                          placeholder="Enter your password"
+                          placeholder="Enter any password"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           className="pr-12 h-12 px-4"
@@ -289,6 +245,17 @@ export default function LoginPage() {
                     </Button>
                   </div>
                 </form>
+            
+
+                {/* OceanPhase Copyright */}
+                <div className="mt-8 pt-4 border-t text-center">
+                  <p className="text-xs text-muted-foreground">
+                    © {new Date().getFullYear()} OceanPhase. All rights reserved.
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Version 1.0.0 | OceanPhase Inc.
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </div>
