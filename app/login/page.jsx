@@ -171,8 +171,8 @@ export default function LoginPage() {
                 <Image
                   src="/logos/logo.png"
                   alt="One Network Logo"
-                  width={70}
-                  height={30}
+                  width={200}
+                  height={100}
                   className="mx-auto mb-4"
                 />
                 <p className="text-sm text-muted-foreground">Sign in with your account</p>

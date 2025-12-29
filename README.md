@@ -1,4 +1,4 @@
-# Stream-Wisp
+# Stream-Mikrotik
 
 ## Overview
 A monitoring tool for MikroTik networks that tracks access point status and DHCP server health in real-time.
