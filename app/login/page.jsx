@@ -197,10 +197,10 @@ export default function LoginPage() {
       />
 
       <div className="min-h-screen flex bg-background">
-        {/* Mobile Layout Only - Logo at Top, Form Centered */}
-        <div className="block lg:hidden w-full">
-          {/* Mobile Header - Fixed at top */}
-          <div className="pt-6 px-6">
+        {/* Mobile Layout Only */}
+        <div className="block lg:hidden w-full min-h-screen flex flex-col">
+          {/* Logo Section - Top */}
+          <div className="pt-8 px-6 pb-4">
             <Image
               src="/logos/logo.png"
               alt="One Network Logo"
@@ -214,10 +214,10 @@ export default function LoginPage() {
             </p>
           </div>
           
-          {/* Centered Form Container */}
-          <div className="flex-1 flex flex-col justify-center px-4 py-4">
-            <div className="w-full max-w-md mx-auto">
-              <Card>
+          {/* Centered Form Container - Takes remaining space */}
+          <div className="flex-1 flex items-center justify-center px-4 pb-6">
+            <div className="w-full max-w-md">
+              <Card className="border-border/50 shadow-sm">
                 <CardContent className="px-5 py-6">
                   <form onSubmit={handleLogin} onKeyDown={handleKeyPress}>
                     <div className="space-y-4">
@@ -300,7 +300,7 @@ export default function LoginPage() {
               </Card>
 
               {/* Mobile Footer Links - Below the centered form */}
-              <div className="mt-6 text-center">
+              <div className="mt-8 text-center">
                 <div className="flex flex-wrap justify-center gap-3 text-xs text-muted-foreground mb-3">
                   <Link 
                     href="/terms" 

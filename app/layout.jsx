@@ -1,5 +1,5 @@
 import { Analytics } from "@vercel/analytics/next"
-import { Josefin_Sans, Inter } from "next/font/google"
+import { Josefin_Sans, Inter,Nunito } from "next/font/google"
 import "./globals.css"
 
 export const metadata = {
@@ -25,9 +25,16 @@ const inter = Inter({
   variable: "--font-inter",
 })
 
+const nunito = Nunito({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-nunito",
+  weight: ["400", "600", "700"],
+})    
+
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${josefinSans.variable} ${inter.variable}`}>
+    <html lang="en" className={`${josefinSans.variable} ${inter.variable} ${nunito.variable}`}>
       <head>
         <link rel="icon" href="/favicon.png" />
         <meta name="theme-color" content="#25D366" />
