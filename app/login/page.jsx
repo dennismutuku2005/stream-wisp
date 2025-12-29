@@ -177,7 +177,7 @@ export default function LoginPage() {
                       <Input
                         id="identifier"
                         type="text"
-                        placeholder="Enter any username, email or mobile"
+                        placeholder="Enter your username, email or mobile"
                         value={identifier}
                         onChange={(e) => setIdentifier(e.target.value)}
                         className="h-12 px-4"
@@ -192,7 +192,7 @@ export default function LoginPage() {
                         <Input
                           id="password"
                           type={showPassword ? "text" : "password"}
-                          placeholder="Enter any password"
+                          placeholder="Enter your password"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           className="pr-12 h-12 px-4"
