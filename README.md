@@ -6,9 +6,6 @@
 ## Overview
 A monitoring tool for MikroTik networks built with Next.js that tracks access point status and DHCP server health in real-time.
 
-**Version:** 1.0.0 (from package.json)  
-**Framework:** Next.js
-
 ## Features
 
 ### 🔍 Monitoring Capabilities
@@ -26,29 +23,13 @@ A monitoring tool for MikroTik networks built with Next.js that tracks access po
 - **Configurable Thresholds** – Custom alert conditions
 - **Escalation Rules** – Multi-level alerting for critical issues
 
-## Use Cases
-
-### 🏢 Enterprise Networks
-- Monitor campus-wide wireless coverage
-- Track AP failures across multiple buildings
-- Ensure DHCP availability for critical services
-
-### 🏨 Hospitality & Retail
-- Maintain guest WiFi reliability
-- Monitor high-density AP deployments
-- Track seasonal usage patterns
-
-### 🏠 Managed Service Providers
-- Centralized monitoring for client networks
-- Automated ticket creation for outages
-- SLA compliance reporting
 
 ## Outputs
 
 ### Dashboard
 - Web-based status dashboard
 - Geographic AP location view
-- Real-time connection graphs
+- Real-time connection graph
 
 ### Reports
 - Daily/Weekly/Monthly summaries
