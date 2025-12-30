@@ -60,6 +60,7 @@ import {
   Users as UsersIcon,
   Book,
   Video,
+  AlignVerticalDistributeEndIcon,
 
 
 } from "lucide-react"
@@ -82,10 +83,7 @@ const navigation = [
     icon: RouterIcon,
     submenu: [
       { name: "All Routers", href: "/dashboard/routers", icon: Server, badge: "5" },
-      { name: "Add Router", href: "/dashboard/routers/add", icon: Plus },
-      { name: "Router Groups", href: "/dashboard/routers/groups", icon: Layers },
-      { name: "Offline Routers", href: "/dashboard/routers/offline", icon: WifiOff, badge: "0" },
-      { name: "High Load", href: "/dashboard/routers/load", icon: Cpu, badge: "1" },
+      { name: "Aps-Distribution", href: "/dashboard/routers/aps", icon: AlignVerticalDistributeEndIcon, badge: "1" },
     ],
   },
   {
