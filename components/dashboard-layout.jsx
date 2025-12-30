@@ -92,7 +92,6 @@ const navigation = [
     icon: Badge,
     submenu: [
       { name: "All APs", href: "/dashboard/access-points", icon: Badge, badge: "23" },
-      { name: "Add AP", href: "/dashboard/access-points/add", icon: Plus },
       { name: "Unregistered APs", href: "/dashboard/access-points/unregistered", icon: ShieldAlert, badge: "2" },
       { name: "AP Locations", href: "/dashboard/access-points/locations", icon: MapPin },
     ],
