@@ -103,7 +103,6 @@ const navigation = [
     submenu: [
       { name: "DHCP Conflicts", href: "/dashboard/monitoring/conflicts", icon: AlertCircle, badge: "3" },
       { name: "Off Aps", href: "/dashboard/monitoring/off-aps", icon: NetworkIcon, badge: "5" },
-      { name: "IP Addresses", href: "/dashboard/monitoring/ips", icon: Globe },
     ],
   },
   {
