@@ -102,8 +102,7 @@ const navigation = [
     icon: Activity,
     submenu: [
       { name: "DHCP Conflicts", href: "/dashboard/monitoring/conflicts", icon: AlertCircle, badge: "3" },
-      { name: "New Hosts", href: "/dashboard/monitoring/new-hosts", icon: UsersIcon, badge: "5" },
-      { name: "MAC Tracking", href: "/dashboard/monitoring/mac", icon: NetworkIcon },
+      { name: "Off Aps", href: "/dashboard/monitoring/off-aps", icon: NetworkIcon, badge: "5" },
       { name: "IP Addresses", href: "/dashboard/monitoring/ips", icon: Globe },
     ],
   },
@@ -152,7 +151,6 @@ const navigation = [
       { name: "Documentation", href: "/dashboard/help/docs", icon: Book },
       { name: "Tutorials", href: "/dashboard/help/tutorials", icon: Video },
       { name: "FAQ", href: "/dashboard/help/faq", icon: HelpCircle },
-      { name: "Contact Support", href: "/dashboard/help/contact", icon: MessageCircle },
       { name: "System Info", href: "/dashboard/help/system", icon: Info },
     ],
   },
