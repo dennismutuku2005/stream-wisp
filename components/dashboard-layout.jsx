@@ -128,7 +128,6 @@ const navigation = [
     icon: Settings,
     submenu: [
       { name: "General", href: "/dashboard/settings/general", icon: Settings2Icon },
-      { name: "Personalization", href: "/dashboard/settings/personalization", icon: UserCircle },
       { name: "Notification Settings", href: "/dashboard/settings/notifications", icon: Bell },
     ],
   },
