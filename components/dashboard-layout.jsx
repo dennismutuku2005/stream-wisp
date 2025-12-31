@@ -52,7 +52,6 @@ import {
   Terminal,
   Code,
   Database,
-
   ShieldAlert,
   Network as NetworkIcon,
   Wifi as WifiIcon,
@@ -61,8 +60,6 @@ import {
   Book,
   Video,
   AlignVerticalDistributeEndIcon,
-
-
 } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -180,21 +177,82 @@ function Ticket({ className }) {
   )
 }
 
+// Custom hook to persist sidebar state in localStorage
+function useSidebarState() {
+  const [expandedItems, setExpandedItems] = useState({})
+  const [scrollPosition, setScrollPosition] = useState(0)
+  const [isInitialized, setIsInitialized] = useState(false)
 
+  // Load state from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedState = localStorage.getItem('sidebarExpandedItems')
+      if (savedState) {
+        setExpandedItems(JSON.parse(savedState))
+      }
+      const savedScroll = localStorage.getItem('sidebarScrollPosition')
+      if (savedScroll) {
+        setScrollPosition(Number(savedScroll))
+      }
+    } catch (error) {
+      console.error('Error loading sidebar state:', error)
+    } finally {
+      setIsInitialized(true)
+    }
+  }, [])
+
+  // Save expanded items to localStorage
+  useEffect(() => {
+    if (isInitialized) {
+      try {
+        localStorage.setItem('sidebarExpandedItems', JSON.stringify(expandedItems))
+      } catch (error) {
+        console.error('Error saving sidebar state:', error)
+      }
+    }
+  }, [expandedItems, isInitialized])
+
+  // Save scroll position to localStorage (with debounce)
+  useEffect(() => {
+    if (isInitialized && scrollPosition > 0) {
+      const timer = setTimeout(() => {
+        try {
+          localStorage.setItem('sidebarScrollPosition', scrollPosition.toString())
+        } catch (error) {
+          console.error('Error saving scroll position:', error)
+        }
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [scrollPosition, isInitialized])
+
+  return {
+    expandedItems,
+    setExpandedItems,
+    scrollPosition,
+    setScrollPosition,
+    isInitialized
+  }
+}
 
 export function DashboardLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [userData, setUserData] = useState(null)
   const [isCardOpen, setIsCardOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [expandedItems, setExpandedItems] = useState({})
 
   const sidebarRef = useRef(null)
-  const scrollPositionRef = useRef(0)
-  const restoreScrollTimeoutRef = useRef(null)
-
   const pathname = usePathname()
   const router = useRouter()
+
+  // Use our custom hook for sidebar state
+  const {
+    expandedItems,
+    setExpandedItems,
+    scrollPosition,
+    setScrollPosition,
+    isInitialized
+  } = useSidebarState()
 
   // Capitalize first letter of username
   const capitalizeUsername = (username) => {
@@ -247,6 +305,40 @@ export function DashboardLayout({ children }) {
     return () => clearInterval(interval)
   }, [router])
 
+  // Restore scroll position when sidebar mounts
+  useEffect(() => {
+    if (sidebarRef.current && scrollPosition > 0) {
+      const restoreScroll = () => {
+        if (sidebarRef.current) {
+          sidebarRef.current.scrollTop = scrollPosition
+        }
+      }
+      
+      // Try immediately
+      restoreScroll()
+      
+      // Try again after a short delay
+      const timer = setTimeout(restoreScroll, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [scrollPosition, isInitialized])
+
+  // Save scroll position when user scrolls (with debounce)
+  useEffect(() => {
+    const handleScroll = () => {
+      if (sidebarRef.current) {
+        const currentScroll = sidebarRef.current.scrollTop
+        setScrollPosition(currentScroll)
+      }
+    }
+
+    const sidebar = sidebarRef.current
+    if (sidebar) {
+      sidebar.addEventListener('scroll', handleScroll)
+      return () => sidebar.removeEventListener('scroll', handleScroll)
+    }
+  }, [setScrollPosition])
+
   // Close card when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -259,55 +351,37 @@ export function DashboardLayout({ children }) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [isCardOpen])
 
-  // Save scroll position
-  const saveScrollPosition = () => {
-    if (sidebarRef.current) {
-      scrollPositionRef.current = sidebarRef.current.scrollTop
-    }
-  }
-
-  // Restore scroll position
-  const restoreScrollPosition = () => {
-    if (sidebarRef.current && scrollPositionRef.current > 0) {
-      sidebarRef.current.scrollTop = scrollPositionRef.current
-    }
-  }
-
-  // Toggle submenu expansion with scroll preservation
+  // Toggle submenu expansion
   const toggleSubmenu = (itemName) => {
-    // Save current scroll position
-    saveScrollPosition()
-
-    // Clear any existing timeout
-    if (restoreScrollTimeoutRef.current) {
-      clearTimeout(restoreScrollTimeoutRef.current)
-    }
-
-    // Update expanded state
     setExpandedItems(prev => ({
       ...prev,
       [itemName]: !prev[itemName]
     }))
-
-    // Restore scroll position after DOM update
-    restoreScrollTimeoutRef.current = setTimeout(() => {
-      restoreScrollPosition()
-    }, 10)
   }
 
   // Auto-expand parent menu when navigating to submenu
   useEffect(() => {
-    const newExpandedItems = { ...expandedItems }
+    if (!isInitialized) return
+    
     let hasChanges = false
+    const newExpandedItems = { ...expandedItems }
 
     // Find the parent menu item for the current path
     navigation.forEach(item => {
       if (item.submenu) {
-        const isActiveChild = item.submenu.some(sub => pathname === sub.href)
+        const isActiveChild = item.submenu.some(sub => {
+          // Match exact path or paths that start with the submenu href
+          return pathname === sub.href || pathname.startsWith(sub.href + '/')
+        })
+        
+        // If we're on a child page, expand its parent
         if (isActiveChild && !newExpandedItems[item.name]) {
           newExpandedItems[item.name] = true
           hasChanges = true
         }
+        
+        // If we're NOT on any child page of this parent, don't collapse it
+        // (keep it as is - this is important for maintaining state)
       }
     })
 
@@ -315,16 +389,14 @@ export function DashboardLayout({ children }) {
     if (hasChanges) {
       setExpandedItems(newExpandedItems)
     }
-  }, [pathname])
+  }, [pathname, isInitialized])
 
-  // Clean up on unmount
+  // Close mobile sidebar when route changes
   useEffect(() => {
-    return () => {
-      if (restoreScrollTimeoutRef.current) {
-        clearTimeout(restoreScrollTimeoutRef.current)
-      }
+    if (sidebarOpen && window.innerWidth < 1024) {
+      setSidebarOpen(false)
     }
-  }, [])
+  }, [pathname])
 
   // Logout handler
   const handleLogout = () => {
@@ -372,16 +444,13 @@ export function DashboardLayout({ children }) {
       <div
         ref={sidebarRef}
         className="flex-1 overflow-y-auto"
-        onScroll={() => {
-          // Update scroll position ref as user scrolls
-          if (sidebarRef.current) {
-            scrollPositionRef.current = sidebarRef.current.scrollTop
-          }
-        }}
       >
         <nav className="space-y-1 px-2 py-4">
           {navigation.map((item) => {
-            const isActive = pathname === item.href || (item.submenu && item.submenu.some(sub => pathname === sub.href))
+            const isActive = pathname === item.href || 
+              (item.submenu && item.submenu.some(sub => 
+                pathname === sub.href || pathname.startsWith(sub.href + '/')
+              ))
             const hasSubmenu = item.submenu && item.submenu.length > 0
             const isExpanded = expandedItems[item.name]
             const Icon = item.icon
@@ -401,7 +470,10 @@ export function DashboardLayout({ children }) {
                       e.preventDefault()
                       toggleSubmenu(item.name)
                     } else {
-                      setSidebarOpen(false)
+                      // Only close sidebar on mobile
+                      if (window.innerWidth < 1024) {
+                        setSidebarOpen(false)
+                      }
                     }
                   }}
                 >
@@ -430,7 +502,8 @@ export function DashboardLayout({ children }) {
                 {hasSubmenu && isExpanded && (
                   <div className="ml-4 mt-1 space-y-1 border-l border-sidebar-border pl-2">
                     {item.submenu.map((subItem) => {
-                      const isSubActive = pathname === subItem.href
+                      const isSubActive = pathname === subItem.href || 
+                        pathname.startsWith(subItem.href + '/')
                       const SubIcon = subItem.icon
                       return (
                         <Link
@@ -442,7 +515,12 @@ export function DashboardLayout({ children }) {
                               ? "bg-sidebar-accent text-sidebar-accent-foreground"
                               : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                           )}
-                          onClick={() => setSidebarOpen(false)}
+                          onClick={() => {
+                            // Only close sidebar on mobile
+                            if (window.innerWidth < 1024) {
+                              setSidebarOpen(false)
+                            }
+                          }}
                         >
                           <div className="flex items-center space-x-3">
                             <SubIcon className="h-4 w-4 flex-shrink-0" />
