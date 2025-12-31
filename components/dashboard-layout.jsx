@@ -60,6 +60,9 @@ import {
   Book,
   Video,
   AlignVerticalDistributeEndIcon,
+  UserCircle,
+  UserXIcon,
+  Settings2Icon,
 } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -124,12 +127,9 @@ const navigation = [
     href: "/dashboard/settings",
     icon: Settings,
     submenu: [
-      { name: "General", href: "/dashboard/settings/general", icon: Settings },
-      { name: "Personalization", href: "/dashboard/settings/personalization", icon: Zap },
+      { name: "General", href: "/dashboard/settings/general", icon: Settings2Icon },
+      { name: "Personalization", href: "/dashboard/settings/personalization", icon: UserCircle },
       { name: "Notification Settings", href: "/dashboard/settings/notifications", icon: Bell },
-      { name: "API Configuration", href: "/dashboard/settings/api", icon: Code },
-      { name: "Backup & Restore", href: "/dashboard/settings/backup", icon: Database },
-      { name: "Security", href: "/dashboard/settings/security", icon: Lock },
     ],
   },
   {
