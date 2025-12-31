@@ -107,7 +107,7 @@ const navigation = [
     href: "/dashboard/alerts",
     icon: Bell,
     submenu: [
-      { name: "All Alerts", href: "/dashboard/alerts", icon: Bell, badge: "8" },
+      { name: "All Alerts", href: "/dashboard/alerts/all-alerts", icon: Bell, badge: "8" },
       { name: "Alert Rules", href: "/dashboard/alerts/rules", icon: ShieldCheck },
     ],
   },

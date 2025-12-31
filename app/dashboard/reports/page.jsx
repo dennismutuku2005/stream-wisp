@@ -26,7 +26,9 @@ import {
   Router,
   TrendingDown,
   TrendingUp,
-  RefreshCw
+  RefreshCw,
+  AlertCircle,
+  AlertCircleIcon
 } from "lucide-react";
 
 // --- Mock Data ---
@@ -181,7 +183,7 @@ export default function StreamReportPage() {
                    <h3 className="text-2xl font-bold text-foreground mt-1">8</h3>
                  </div>
                  <div className="p-2 bg-orange-50 text-orange-600 rounded-lg">
-                   <ShieldAlert className="h-5 w-5" />
+                   <AlertCircleIcon className="h-5 w-5" />
                  </div>
               </div>
               <div className="mt-4 flex items-center text-xs font-medium text-orange-600">
@@ -241,7 +243,7 @@ export default function StreamReportPage() {
                   <p className="text-xs text-muted-foreground">Incident frequency over 24 Hours</p>
                 </div>
                 <div className="p-2 bg-orange-50 text-orange-600 rounded-lg">
-                   <ShieldAlert className="h-4 w-4" />
+                   <AlertCircle className="h-4 w-4" />
                 </div>
               </div>
 
