@@ -1,34 +1,27 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { DashboardLayout } from "@/components/dashboard-layout"; // Assuming this exists
+import { DashboardLayout } from "@/components/dashboard-layout";
 import {
   Router,
   Wifi,
   Activity,
-  RefreshCw,
   Plus,
-  ShieldCheck,
-  Zap,
-  Server,
   Bell,
   Search,
-  MoreHorizontal,
   ArrowUpRight,
   ArrowDownRight,
   Fingerprint,
-  Badge
+  Badge,
+  WifiOff,
+  ShieldAlert,
+  Server
 } from "lucide-react";
-
-// Mock Data
-const mockUserData = { username: "Admin", company: "Terra" };
 
 // --- Components ---
 
 /** 
  * Metric Card 
- * Style: Clean white with subtle border, matching the input fields in the image.
- * Icon: Uses the Indigo primary color.
  */
 const MetricCard = ({ title, value, change, icon: Icon, trend }) => (
   <div className="group p-5 bg-card border border-border rounded-xl hover:border-primary/50 transition-all duration-300">
@@ -56,47 +49,43 @@ const MetricCard = ({ title, value, change, icon: Icon, trend }) => (
 
 /**
  * Status Pill
- * Style: Matches the "Credit Scoring", "ID Verification" pink pills from the image.
  */
 const StatusPill = ({ status, text }) => {
   const styles = {
     online: "bg-green-50 text-green-700 border-green-200",
     offline: "bg-red-50 text-red-700 border-red-200",
     warning: "bg-orange-50 text-orange-700 border-orange-200",
-    // Special 'Terra' style for active tags
     active: "bg-secondary text-secondary-foreground border-transparent font-bold", 
   };
 
   const activeStyle = styles[status] || styles.online;
 
   return (
-    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${activeStyle}`}>
-      {status === 'online' && <span className="w-1.5 h-1.5 rounded-full bg-green-500 mr-2 animate-pulse" />}
-      {status === 'offline' && <span className="w-1.5 h-1.5 rounded-full bg-red-500 mr-2" />}
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${activeStyle}`}>
+      {status === 'online' && <span className="w-1 h-1 rounded-full bg-green-500 mr-1.5 animate-pulse" />}
       {text}
     </span>
   );
 };
 
 /**
- * Router Row
- * Style: Looks like the "Select Country" input field from the image.
+ * Router Row (Compacted)
+ * Reduced padding to p-3 to make it smaller
  */
 const RouterRow = ({ name, ip, status, model }) => (
-  <div className="flex items-center justify-between p-4 border border-border rounded-xl mb-3 hover:border-primary/40 transition-colors bg-white dark:bg-card/50">
-    <div className="flex items-center gap-4">
-      <div className="h-10 w-10 rounded-lg bg-primary/5 flex items-center justify-center text-primary">
-        <Router className="h-5 w-5" />
+  <div className="flex items-center justify-between p-3 border border-border rounded-xl mb-2 hover:border-primary/40 transition-colors bg-white hover:shadow-sm">
+    <div className="flex items-center gap-3">
+      <div className="h-8 w-8 rounded-lg bg-primary/5 flex items-center justify-center text-primary shrink-0">
+        <Router className="h-4 w-4" />
       </div>
       <div>
-        <h4 className="font-bold text-sm text-foreground">{name}</h4>
-        <p className="text-xs text-muted-foreground font-mono mt-0.5">{ip}</p>
+        <h4 className="font-bold text-xs text-foreground">{name}</h4>
+        <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{ip}</p>
       </div>
     </div>
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-3">
       <div className="hidden sm:block text-right">
-        <p className="text-xs font-semibold text-foreground">{model}</p>
-        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Model</p>
+        <p className="text-[10px] font-semibold text-foreground">{model}</p>
       </div>
       <StatusPill status={status} text={status === 'online' ? 'Active' : 'Down'} />
     </div>
@@ -104,29 +93,42 @@ const RouterRow = ({ name, ip, status, model }) => (
 );
 
 /**
- * Action Button
- * Style: Matches the big "Sign Up" button (Solid Indigo).
+ * Quick Action Item
+ * Styled as a clean, actionable list item with a count badge
  */
-const ActionButton = ({ icon: Icon, label, variant = "primary" }) => {
-  const base = "flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-bold transition-all duration-200";
-  const styles = {
-    primary: "bg-primary text-primary-foreground hover:opacity-90 shadow-sm shadow-primary/20",
-    outline: "bg-transparent border border-border text-foreground hover:bg-muted hover:border-primary/30",
-    ghost: "bg-primary/5 text-primary hover:bg-primary/10"
-  };
+const QuickActionItem = ({ icon: Icon, label, count, colorClass, onClick }) => (
+  <button 
+    onClick={onClick}
+    className="w-full flex items-center justify-between p-3 rounded-xl border border-border bg-white hover:border-primary/30 hover:shadow-sm transition-all group"
+  >
+    <div className="flex items-center gap-3">
+      <div className={`p-2 rounded-lg ${colorClass} group-hover:scale-105 transition-transform`}>
+        <Icon className="h-4 w-4" />
+      </div>
+      <span className="text-sm font-bold text-foreground">{label}</span>
+    </div>
+    {count !== undefined && (
+      <span className="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded-md border border-gray-200">
+        {count}
+      </span>
+    )}
+    {count === undefined && <ArrowUpRight className="h-4 w-4 text-gray-300 group-hover:text-primary" />}
+  </button>
+);
 
-  return (
-    <button className={`${base} ${styles[variant]}`}>
-      <Icon className="h-4 w-4" />
-      {label}
-    </button>
-  );
-};
+/**
+ * Main Action Button (Header)
+ */
+const HeaderActionButton = ({ icon: Icon, label }) => (
+  <button className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground hover:opacity-90 rounded-xl text-sm font-bold transition-all shadow-sm shadow-primary/20">
+    <Icon className="h-4 w-4" />
+    {label}
+  </button>
+);
 
 export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
 
-  // Simulate loading
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 800);
     return () => clearTimeout(timer);
@@ -137,13 +139,13 @@ export default function Dashboard() {
       <div className="min-h-screen bg-background font-sans">
         
         {/* Top Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-foreground tracking-tight mb-2">
+            <h1 className="text-2xl font-bold text-foreground tracking-tight mb-1">
               Overview
             </h1>
-            <p className="text-muted-foreground">
-              Manage your <span className="font-bold text-primary">Mikrotik</span> network infrastructure.
+            <p className="text-sm text-muted-foreground">
+              Network health summary for <span className="font-bold text-primary">Terra</span>.
             </p>
           </div>
           
@@ -152,30 +154,27 @@ export default function Dashboard() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input 
                 type="text" 
-                placeholder="Search devices..." 
-                className="pl-9 pr-4 py-2.5 text-sm bg-white border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 w-64 transition-all"
+                placeholder="Search..." 
+                className="pl-9 pr-4 py-2.5 text-xs bg-white border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 w-56 transition-all shadow-sm"
               />
             </div>
-            <button className="p-2.5 bg-white border border-border rounded-lg hover:border-primary/40 text-muted-foreground hover:text-primary transition-colors">
-              <Bell className="h-5 w-5" />
-            </button>
-            <ActionButton icon={Plus} label="Add AP" variant="primary" />
+            <HeaderActionButton icon={Plus} label="Add AP" />
           </div>
         </div>
 
         {/* Metrics Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <MetricCard 
             title="Active Routers" 
             value="12" 
-            change="+2.5%" 
+            change="+1" 
             trend="up" 
             icon={Router} 
           />
           <MetricCard 
-            title="Total Access Points" 
+            title="Total APs" 
             value="48" 
-            change="+12%" 
+            change="+4" 
             trend="up" 
             icon={Badge} 
           />
@@ -188,68 +187,76 @@ export default function Dashboard() {
           />
           <MetricCard 
             title="Security Score" 
-            value="98/100" 
+            value="98" 
             icon={Fingerprint} 
             trend="up"
-            change="Secure"
+            change="High"
           />
         </div>
 
         {/* Main Content Layout */}
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-6">
           
           {/* Left Column: Router List (Takes up 2/3) */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-foreground">Device Management</h2>
-              <button className="text-sm font-semibold text-primary hover:text-primary/80 flex items-center gap-1">
-                View All <ArrowUpRight className="h-4 w-4" />
+              <h2 className="text-lg font-bold text-foreground">Device Status</h2>
+              <button className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+                View All <ArrowUpRight className="h-3 w-3" />
               </button>
             </div>
 
-            <div className="bg-white rounded-2xl border border-border p-6 shadow-sm">
-              {/* Table Header */}
-              <div className="flex items-center justify-between mb-6 text-sm font-semibold text-muted-foreground px-1">
-                <span>Device Name</span>
-                <span className="hidden sm:block">Model</span>
-              </div>
-
-              {/* Rows - styled like input fields */}
+            <div className="bg-white rounded-2xl border border-border p-5 shadow-sm">
               <div className="space-y-1">
                 <RouterRow name="HQ Gateway" ip="192.168.1.1" model="CCR1009" status="online" />
                 <RouterRow name="Warehouse Main" ip="192.168.20.1" model="RB4011" status="online" />
                 <RouterRow name="Guest Network" ip="192.168.88.1" model="hAP ax3" status="warning" />
                 <RouterRow name="Backup Link" ip="10.0.0.1" model="LHG 5" status="offline" />
+                <RouterRow name="Sales Office" ip="10.20.50.1" model="RB5009" status="online" />
               </div>
             </div>
           </div>
 
           {/* Right Column: Quick Actions & Status (Takes up 1/3) */}
           <div className="space-y-6">
-            <h2 className="text-xl font-bold text-foreground">Quick Actions</h2>
             
-            <div className="bg-white rounded-2xl border border-border p-6 shadow-sm space-y-4">
-              <p className="text-sm text-muted-foreground mb-4">
-                Common tasks and configuration shortcuts.
-              </p>
-              
-              <ActionButton icon={Zap} label="Run Speed Test" variant="outline" />
-              <ActionButton icon={RefreshCw} label="Reboot System" variant="outline" />
-              <ActionButton icon={Server} label="Update Firmware" variant="outline" />
+            {/* Quick Actions / Alerts */}
+            <div>
+              <h2 className="text-lg font-bold text-foreground mb-4">Attention Needed</h2>
+              <div className="space-y-3">
+                <QuickActionItem 
+                  icon={WifiOff} 
+                  label="Offline APs" 
+                  count={3} 
+                  colorClass="bg-red-50 text-red-600" 
+                  onClick={() => {}}
+                />
+                <QuickActionItem 
+                  icon={ShieldAlert} 
+                  label="DHCP Conflicts" 
+                  count={1} 
+                  colorClass="bg-orange-50 text-orange-600" 
+                  onClick={() => {}}
+                />
+                <QuickActionItem 
+                  icon={Server} 
+                  label="Mikrotik Routers" 
+                  count={12} 
+                  colorClass="bg-blue-50 text-blue-600" 
+                  onClick={() => {}}
+                />
+              </div>
             </div>
 
-            {/* "Services" section styled like the Tags in your image */}
+            {/* "Services" section */}
             <div>
-              <h2 className="text-xl font-bold text-foreground mb-4">Active Services</h2>
+              <h2 className="text-lg font-bold text-foreground mb-4">Services</h2>
               <div className="flex flex-wrap gap-2">
                 <StatusPill status="active" text="VPN Access" />
                 <StatusPill status="active" text="Firewall" />
                 <StatusPill status="active" text="Hotspot" />
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500 border border-gray-200">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-500 border border-gray-200">
                   DPI Analysis
-                </span>
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500 border border-gray-200">
-                  Container
                 </span>
               </div>
             </div>
