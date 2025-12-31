@@ -420,7 +420,7 @@ export function DashboardLayout({ children }) {
   }
 
   const SidebarContent = () => (
-    <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
+    <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border font-sans">
       {/* Logo Area - Fixed */}
       <div className="flex-shrink-0 h-16 flex items-center border-b border-sidebar-border px-4">
         <div className="flex items-center space-x-3">
