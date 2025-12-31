@@ -108,9 +108,6 @@ const navigation = [
     icon: Bell,
     submenu: [
       { name: "All Alerts", href: "/dashboard/alerts", icon: Bell, badge: "8" },
-      { name: "WhatsApp Alerts", href: "/dashboard/alerts/whatsapp", icon: MessageSquare },
-      { name: "SMS Alerts", href: "/dashboard/alerts/sms", icon: PhoneIcon },
-      { name: "Email Alerts", href: "/dashboard/alerts/email", icon: Mail },
       { name: "Alert Rules", href: "/dashboard/alerts/rules", icon: ShieldCheck },
     ],
   },
@@ -179,16 +176,16 @@ function Ticket({ className }) {
 
 // Custom hook to persist sidebar state in localStorage
 function useSidebarState() {
-  const [expandedItems, setExpandedItems] = useState({})
+  const [expandedItem, setExpandedItem] = useState(null)
   const [scrollPosition, setScrollPosition] = useState(0)
   const [isInitialized, setIsInitialized] = useState(false)
 
   // Load state from localStorage on mount
   useEffect(() => {
     try {
-      const savedState = localStorage.getItem('sidebarExpandedItems')
-      if (savedState) {
-        setExpandedItems(JSON.parse(savedState))
+      const savedExpandedItem = localStorage.getItem('sidebarExpandedItem')
+      if (savedExpandedItem) {
+        setExpandedItem(savedExpandedItem)
       }
       const savedScroll = localStorage.getItem('sidebarScrollPosition')
       if (savedScroll) {
@@ -201,16 +198,16 @@ function useSidebarState() {
     }
   }, [])
 
-  // Save expanded items to localStorage
+  // Save expanded item to localStorage
   useEffect(() => {
     if (isInitialized) {
       try {
-        localStorage.setItem('sidebarExpandedItems', JSON.stringify(expandedItems))
+        localStorage.setItem('sidebarExpandedItem', expandedItem || '')
       } catch (error) {
         console.error('Error saving sidebar state:', error)
       }
     }
-  }, [expandedItems, isInitialized])
+  }, [expandedItem, isInitialized])
 
   // Save scroll position to localStorage (with debounce)
   useEffect(() => {
@@ -227,8 +224,8 @@ function useSidebarState() {
   }, [scrollPosition, isInitialized])
 
   return {
-    expandedItems,
-    setExpandedItems,
+    expandedItem,
+    setExpandedItem,
     scrollPosition,
     setScrollPosition,
     isInitialized
@@ -247,8 +244,8 @@ export function DashboardLayout({ children }) {
 
   // Use our custom hook for sidebar state
   const {
-    expandedItems,
-    setExpandedItems,
+    expandedItem,
+    setExpandedItem,
     scrollPosition,
     setScrollPosition,
     isInitialized
@@ -351,20 +348,16 @@ export function DashboardLayout({ children }) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [isCardOpen])
 
-  // Toggle submenu expansion
+  // Toggle submenu expansion (accordion style)
   const toggleSubmenu = (itemName) => {
-    setExpandedItems(prev => ({
-      ...prev,
-      [itemName]: !prev[itemName]
-    }))
+    setExpandedItem(prev => prev === itemName ? null : itemName)
   }
 
   // Auto-expand parent menu when navigating to submenu
   useEffect(() => {
     if (!isInitialized) return
     
-    let hasChanges = false
-    const newExpandedItems = { ...expandedItems }
+    let newExpandedItem = null
 
     // Find the parent menu item for the current path
     navigation.forEach(item => {
@@ -375,19 +368,15 @@ export function DashboardLayout({ children }) {
         })
         
         // If we're on a child page, expand its parent
-        if (isActiveChild && !newExpandedItems[item.name]) {
-          newExpandedItems[item.name] = true
-          hasChanges = true
+        if (isActiveChild) {
+          newExpandedItem = item.name
         }
-        
-        // If we're NOT on any child page of this parent, don't collapse it
-        // (keep it as is - this is important for maintaining state)
       }
     })
 
-    // Only update if there are changes
-    if (hasChanges) {
-      setExpandedItems(newExpandedItems)
+    // Only update if different from current
+    if (newExpandedItem !== expandedItem) {
+      setExpandedItem(newExpandedItem)
     }
   }, [pathname, isInitialized])
 
@@ -452,7 +441,7 @@ export function DashboardLayout({ children }) {
                 pathname === sub.href || pathname.startsWith(sub.href + '/')
               ))
             const hasSubmenu = item.submenu && item.submenu.length > 0
-            const isExpanded = expandedItems[item.name]
+            const isExpanded = expandedItem === item.name
             const Icon = item.icon
 
             return (
@@ -595,7 +584,7 @@ export function DashboardLayout({ children }) {
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search products, orders, customers..."
+                placeholder="Search devices, reports..."
                 className="w-full pl-9"
               />
             </div>
