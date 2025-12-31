@@ -101,7 +101,6 @@ const navigation = [
     href: "/dashboard/monitoring",
     icon: Activity,
     submenu: [
-      { name: "Live Traffic", href: "/dashboard/monitoring/traffic", icon: Activity },
       { name: "DHCP Conflicts", href: "/dashboard/monitoring/conflicts", icon: AlertCircle, badge: "3" },
       { name: "New Hosts", href: "/dashboard/monitoring/new-hosts", icon: UsersIcon, badge: "5" },
       { name: "MAC Tracking", href: "/dashboard/monitoring/mac", icon: NetworkIcon },
