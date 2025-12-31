@@ -116,11 +116,7 @@ const navigation = [
     href: "/dashboard/reports",
     icon: FileBarChart,
     submenu: [
-      { name: "Network Health", href: "/dashboard/reports/health", icon: BarChart3 },
-      { name: "Router Performance", href: "/dashboard/reports/routers", icon: RouterIcon },
-      { name: "AP Performance", href: "/dashboard/reports/aps", icon: Wifi },
-      { name: "Security Logs", href: "/dashboard/reports/security", icon: Shield },
-      { name: "Traffic History", href: "/dashboard/reports/traffic", icon: History },
+      { name: "Stream Reports", href: "/dashboard/reports", icon: BarChart3 },
     ],
   },
   {
