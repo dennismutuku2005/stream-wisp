@@ -15,7 +15,10 @@ import {
   Badge,
   WifiOff,
   ShieldAlert,
-  Server
+  Server,
+  AlertTriangle,
+  ChevronRight,
+  AlertCircle
 } from "lucide-react";
 
 // --- Components ---
@@ -33,9 +36,13 @@ const MetricCard = ({ title, value, change, icon: Icon, trend }) => (
         <span className={`text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1 ${
           trend === 'up' 
             ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
-            : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+            : trend === 'down'
+            ? 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+            : 'bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
         }`}>
-          {trend === 'up' ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+          {trend === 'up' ? <ArrowUpRight className="h-3 w-3" /> : 
+           trend === 'down' ? <ArrowDownRight className="h-3 w-3" /> :
+           <AlertCircle className="h-3 w-3" />}
           {change}
         </span>
       )}
@@ -70,7 +77,6 @@ const StatusPill = ({ status, text }) => {
 
 /**
  * Router Row (Compacted)
- * Reduced padding to p-3 to make it smaller
  */
 const RouterRow = ({ name, ip, status, model }) => (
   <div className="flex items-center justify-between p-3 border border-border rounded-xl mb-2 hover:border-primary/40 transition-colors bg-white hover:shadow-sm">
@@ -94,7 +100,6 @@ const RouterRow = ({ name, ip, status, model }) => (
 
 /**
  * Quick Action Item
- * Styled as a clean, actionable list item with a count badge
  */
 const QuickActionItem = ({ icon: Icon, label, count, colorClass, onClick }) => (
   <button 
@@ -162,8 +167,9 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Metrics Grid */}
+        {/* Metrics Grid - WHERE THE CHANGE WAS MADE */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {/* Card 1: Active Routers */}
           <MetricCard 
             title="Active Routers" 
             value="12" 
@@ -171,6 +177,8 @@ export default function Dashboard() {
             trend="up" 
             icon={Router} 
           />
+          
+          {/* Card 2: Total APs */}
           <MetricCard 
             title="Total APs" 
             value="48" 
@@ -178,13 +186,17 @@ export default function Dashboard() {
             trend="up" 
             icon={Badge} 
           />
+          
+          {/* Card 3: ISSUES THIS MONTH (Replaced Network Performance) */}
           <MetricCard 
-            title="Network Load" 
-            value="64%" 
-            change="-5%" 
-            trend="down" 
-            icon={Activity} 
+            title="Issues This Month" 
+            value="15" 
+            change="+3" 
+            trend="warning" 
+            icon={AlertTriangle} 
           />
+          
+          {/* Card 4: Security Score */}
           <MetricCard 
             title="Security Score" 
             value="98" 
@@ -197,12 +209,12 @@ export default function Dashboard() {
         {/* Main Content Layout */}
         <div className="grid lg:grid-cols-3 gap-6">
           
-          {/* Left Column: Router List (Takes up 2/3) */}
+          {/* Left Column: Router List */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-foreground">Device Status</h2>
+              <h2 className="text-lg font-bold text-foreground">MikroTik Devices</h2>
               <button className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
-                View All <ArrowUpRight className="h-3 w-3" />
+                Show All <ChevronRight className="h-3 w-3" />
               </button>
             </div>
 
@@ -217,7 +229,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Right Column: Quick Actions & Status (Takes up 1/3) */}
+          {/* Right Column: Quick Actions & Status */}
           <div className="space-y-6">
             
             {/* Quick Actions / Alerts */}
@@ -239,16 +251,16 @@ export default function Dashboard() {
                   onClick={() => {}}
                 />
                 <QuickActionItem 
-                  icon={Server} 
-                  label="Mikrotik Routers" 
-                  count={12} 
-                  colorClass="bg-blue-50 text-blue-600" 
+                  icon={AlertTriangle} 
+                  label="Network Issues" 
+                  count={15} 
+                  colorClass="bg-amber-50 text-amber-600" 
                   onClick={() => {}}
                 />
               </div>
             </div>
 
-            {/* "Services" section */}
+            {/* Services section */}
             <div>
               <h2 className="text-lg font-bold text-foreground mb-4">Services</h2>
               <div className="flex flex-wrap gap-2">
